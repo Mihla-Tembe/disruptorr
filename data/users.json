@@ -1,0 +1,32 @@
+{
+  "users": [
+    {
+      "id": "1ecd018e-e60d-4688-a8a2-a79e684e5bc2",
+      "fullName": "Moses Mativo",
+      "email": "john.doe@example.com",
+      "passwordHash": "2cf86c2ffa44a926c08fc3f5c93b68fdfbe788f01c385e5dfd90fb6978fa9578",
+      "createdAt": "2025-09-05T16:53:52.478Z"
+    },
+    {
+      "id": "04b61a2b-593b-48d3-9401-cb248ebce294",
+      "fullName": "Moses Mativo",
+      "email": "moses.mativo@dentsu.com",
+      "passwordHash": "2cf86c2ffa44a926c08fc3f5c93b68fdfbe788f01c385e5dfd90fb6978fa9578",
+      "createdAt": "2025-09-06T16:15:23.680Z"
+    },
+    {
+      "id": "e79c822c-3c51-4ee1-999a-82b95ac2a9d4",
+      "fullName": "Joy wangui",
+      "email": "joy.wangui@dentsu.com",
+      "passwordHash": "2cf86c2ffa44a926c08fc3f5c93b68fdfbe788f01c385e5dfd90fb6978fa9578",
+      "createdAt": "2025-09-18T10:53:41.535Z"
+    },
+    {
+      "id": "69b30bd9-c2b6-405c-98fc-1afbb1d5cbde",
+      "fullName": "Test Disruptor",
+      "email": "mosesmativo@dentsu.com",
+      "passwordHash": "2cf86c2ffa44a926c08fc3f5c93b68fdfbe788f01c385e5dfd90fb6978fa9578",
+      "createdAt": "2025-09-18T11:10:46.800Z"
+    }
+  ]
+}
