@@ -27,6 +27,13 @@
       "email": "mosesmativo@dentsu.com",
       "passwordHash": "2cf86c2ffa44a926c08fc3f5c93b68fdfbe788f01c385e5dfd90fb6978fa9578",
       "createdAt": "2025-09-18T11:10:46.800Z"
+    },
+    {
+      "id": "95a065da-bf98-4f8a-9864-3a7cf8868676",
+      "fullName": "Mihlayonke Tembe",
+      "email": "Mihlayonke.tembe@dentsu.com",
+      "passwordHash": "b177cae55b649f5425a4d1faf1828081ea9cf04b2ac74d2e04ec74ca2ea88974",
+      "createdAt": "2025-09-18T18:09:10.600Z"
     }
   ]
 }

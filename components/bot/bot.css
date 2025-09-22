@@ -1,0 +1,149 @@
+.cb-container {
+  --cb-bg: #1D1D1D;
+  --cb-surface:rgb(17, 40, 105);
+  --cb-surface-2: #E9EEF6;
+  --cb-text: #e8eefc;
+  --cb-text2: black;
+  --cb-muted: #96a1c2;
+  --cb-accent: #5b8cff;
+  --cb-border: rgba(255, 255, 255, 0.08);
+
+  background: var(--cb-bg);
+  color: var(--cb-text);
+  width: 100%;
+  max-width: 840px;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  border: 1px solid var(--cb-border);
+  overflow: hidden;
+}
+
+/* Header */
+.cb-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 9vh;
+  background: #E9EEF6;
+  border-bottom: 1px solid var(--cb-border);
+}
+.cb-header-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--cb-accent);
+  box-shadow: 0 0 12px var(--cb-accent);
+}
+.cb-title {
+  font-size: x-large !important;
+  font-weight: 600 !important;
+  color: black !important;
+  text-transform: uppercase;
+}
+
+/* Hero (empty state) */
+.cb-hero {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.cb-hero-badge {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(91, 140, 255, 0.15);
+  margin-bottom: 8px;
+}
+.cb-hero-text {
+  color: var(--cb-muted);
+}
+
+/* Messages */
+.cb-list {
+  overflow-y: auto;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+.cb-row {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 10px;
+}
+.cb-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--cb-surface-2);
+}
+.cb-bubble {
+  background: var(--cb-surface);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+.cb-row-user .cb-bubble {
+  background: rgba(91, 140, 255, 0.15);
+}
+.cb-text {
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+.cb-meta {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--cb-muted);
+}
+
+/* Typing dots */
+.cb-dots {
+  display: inline-block;
+  width: 30px;
+  height: 10px;
+  background: radial-gradient(circle, #e1e5ff 40%, transparent 42%) 0 50%/8px 8px no-repeat,
+    radial-gradient(circle, #e1e5ff 40%, transparent 42%) 12px 50%/8px 8px no-repeat,
+    radial-gradient(circle, #e1e5ff 40%, transparent 42%) 24px 50%/8px 8px no-repeat;
+  animation: cb-pulse 1.2s infinite ease-in-out;
+}
+@keyframes cb-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Input bar */
+.cb-inputbar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  padding: 12px;
+  border-top: 1px solid var(--cb-border);
+}
+.cb-input {
+  resize: none;
+  border: 1px solid var(--cb-border);
+  background: var(--cb-surface-2);
+  color: var(--cb-text2);
+  border-radius: 12px;
+  padding: 10px 12px;
+  min-height: 44px;
+  max-height: 160px;
+}
+.cb-send {
+  border: 1px solid var(--cb-border);
+  background: var(--cb-accent);
+  color: white;
+  border-radius: 12px;
+  padding: 0 16px;
+  cursor: pointer;
+}
+.cb-send:hover {
+  filter: brightness(1.1);
+}
