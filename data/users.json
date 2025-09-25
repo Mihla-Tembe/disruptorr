@@ -34,6 +34,13 @@
       "email": "Mihlayonke.tembe@dentsu.com",
       "passwordHash": "b177cae55b649f5425a4d1faf1828081ea9cf04b2ac74d2e04ec74ca2ea88974",
       "createdAt": "2025-09-18T18:09:10.600Z"
+    },
+    {
+      "id": "e0c413e0-ebe4-4479-865c-29984ce3157f",
+      "fullName": "Disruptor",
+      "email": "disruptor@dentsu.com",
+      "passwordHash": "3f2e72379b6d493db9253a25e868ef46624a4f70c9f8069d38054bda2cf94f38",
+      "createdAt": "2025-09-25T09:16:12.952Z"
     }
   ]
 }
