@@ -77,7 +77,7 @@ export function HelperChat() {
       const origin = window.location.origin
       const endpoint = origin.includes("localhost")
         ? "http://us-central1-localhost:3000/vdc200007-disruptor-prod/chat"
-        : "https://us-central1-vdc200007-disruptor-prod.cloudfunctions.net/chat"
+        : "https://us-central1-vdc200007-disruptor-prod.cloudfunctions.net/chat2"
 
       const res = await fetch(endpoint, {
         method: "POST",
