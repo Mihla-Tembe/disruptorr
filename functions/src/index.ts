@@ -16,7 +16,7 @@ const ai = genkit({
 const app = express();
 app.use(express.json());
 
-const allowedOrigins = "https://dentsudisruptor.web.app";
+const allowedOrigins = "https://disruptorr.vercel.app/";
 
 // Apply CORS middleware globally
 app.use(
