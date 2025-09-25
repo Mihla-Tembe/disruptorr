@@ -151,7 +151,7 @@ export function ChatSidebar({
    }
 
    function handleDelete(id: string) {
-      const deletingCurrent = pathname.endsWith(id);
+      const deletingCurrent = window.location.pathname.endsWith(id);
       const deleted = threads.find((t) => t.id === id);
       removeThread(id);
       if (deletingCurrent) {
@@ -323,7 +323,7 @@ export function ChatSidebar({
                            <AccordionContent>
                               <ul className="mt-2 space-y-1">
                                  {g.items.map((t) => {
-                                    const active = pathname.endsWith(t.id);
+                                    const active = window.location.pathname.endsWith(t.id);
                                     return (
                                        <li key={t.id}>
                                           <div
