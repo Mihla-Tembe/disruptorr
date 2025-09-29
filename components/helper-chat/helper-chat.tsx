@@ -42,7 +42,7 @@ function Bubble({ message }: { message: Message }) {
         className={`${
           isUser
             ? "bg-[#D7DEDD] animate-chat-in-right"
-            : "bg-card animate-chat-in-left"
+            : "bg-[#00895D] animate-chat-in-left"
         } max-w-[75%] rounded-sm px-4 py-3 text-sm`}
       >
         {message.text}

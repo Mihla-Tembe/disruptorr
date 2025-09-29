@@ -51,7 +51,7 @@ export function ChatBubble({
                "max-w-4xl rounded-sm px-4 py-4 text-sm",
                isUser
                   ? "bg-[#D7DEDD] text-foreground animate-chat-in-right py-2"
-                  : "bg-card text-foreground animate-chat-in-left"
+                  : "bg-[#00895D] text-foreground animate-chat-in-left"
             )}>
             {message.content}
             {!isUser && (
