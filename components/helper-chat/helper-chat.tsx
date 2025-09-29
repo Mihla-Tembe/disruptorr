@@ -94,7 +94,6 @@ export function HelperChat() {
       } catch {
         throw new Error("Server did not return valid JSON")
       }
-
       return data.reply || "Sorry, no reply received."
     } catch (err) {
       console.error("Fetch error:", err)
