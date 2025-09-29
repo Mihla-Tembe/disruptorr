@@ -181,7 +181,7 @@ export function ChatSidebar({
    return (
       <aside
          className={cn(
-            "sticky top-0 h-screen flex shrink-0 flex-col bg-primary text-white",
+            "relative top-0 h-screen flex shrink-0 flex-col bg-primary text-white",
             collapsed ? "w-16" : "w-72"
          )}>
          <div
