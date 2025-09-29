@@ -124,7 +124,7 @@ export function Sidebar({
    return (
       <aside
          className={cn(
-            "sticky top-0 h-screen flex shrink-0 flex-col bg-primary text-white relative md:fixed md:inset-y-0 md:left-0 md:top-0",
+            "top-0 h-screen flex shrink-0 flex-col bg-primary text-white relative md:fixed md:inset-y-0 md:left-0 md:top-0",
             collapsed ? "w-16" : "w-72"
          )}>
          <div
