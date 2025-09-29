@@ -15,12 +15,49 @@ export function ChatComposer({
    placeholder?: string;
 }) {
    const [text, setText] = React.useState("");
+   const [isSending, setIsSending] = React.useState(false);
 
-   function handleSend() {
-      const value = text.trim();
-      if (!value) return;
-      onSend(value);
+   async function handleSend() {
+      const userText = text.trim();
+      if (!userText || isSending) return;
+
+      setIsSending(true);
       setText("");
+
+      try {
+         const botReply = await fetchBotReply(userText);
+         onSend(userText);      // Send user message
+         onSend(botReply);      // Send bot reply
+      } catch (err) {
+         console.error("Error handling send:", err);
+         onSend("Error contacting assistant.");
+      } finally {
+         setIsSending(false);
+      }
+   }
+
+   async function fetchBotReply(userText: string): Promise<string> {
+      try {
+         const isLocal = window.location.hostname === "localhost";
+         const endpoint = isLocal
+            ? "http://localhost:3000/vdc200007-disruptor-prod/chat"
+            : "https://us-central1-vdc200007-disruptor-prod.cloudfunctions.net/chat2";
+
+         const res = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query: userText }),
+         });
+
+         const text = await res.text();
+         console.log("Raw response:", text);
+
+         const data = JSON.parse(text);
+         return data.reply || "Sorry, no reply received.";
+      } catch (err) {
+         console.error("Fetch error:", err);
+         return "Error contacting the assistant.";
+      }
    }
 
    function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -40,6 +77,7 @@ export function ChatComposer({
             placeholder={placeholder}
             className="flex-1 border-0 bg-transparent focus-visible:ring-0 shadow-none placeholder:font-semibold py-4"
             aria-label="Message"
+            disabled={isSending}
          />
          <Button variant="ghost" size="icon" aria-label="Voice input">
             <Image
@@ -51,7 +89,7 @@ export function ChatComposer({
                aria-hidden={true}
             />
          </Button>
-         <Button onClick={handleSend} size="icon" aria-label="Send message">
+         <Button onClick={handleSend} size="icon" aria-label="Send message" disabled={isSending}>
             <Send className="size-5" />
          </Button>
       </div>
