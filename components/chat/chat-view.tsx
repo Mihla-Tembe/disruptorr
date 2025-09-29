@@ -42,12 +42,14 @@ export function ChatView({ threadId }: { threadId: string }) {
       return () => clearTimeout(id);
    }, [thread?.messages.length]);
 
+   const [isTyping, setIsTyping] = React.useState(false)
+
    async function handleSend(text: string) {
       // append user message immediately
       update((prev) =>
         appendMessage(prev, threadId, { role: "user", content: text })
       );
-    
+      setIsTyping(true)
       // fetch assistant reply
       const reply = await fetchBotReply(text);
     
@@ -58,6 +60,8 @@ export function ChatView({ threadId }: { threadId: string }) {
           content: reply,
         })
       );
+
+      setIsTyping(false)
     }
 
    if (!thread) return null;
@@ -122,6 +126,13 @@ export function ChatView({ threadId }: { threadId: string }) {
                            threadId={threadId}
                         />
                      ))
+                  )}
+
+                  {/* ✅ Assistant typing indicator */}
+                  {isTyping && (
+                     <div className="text-xs text-gray-500 px-2">
+                        Assistant is typing…
+                     </div>
                   )}
                </div>
             </ScrollArea>
