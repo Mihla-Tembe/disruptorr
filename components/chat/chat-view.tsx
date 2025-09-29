@@ -128,10 +128,10 @@ export function ChatView({ threadId }: { threadId: string }) {
                      ))
                   )}
 
-                  {/* ✅ Assistant typing indicator */}
+                  {/* ✅ AI is typing indicator */}
                   {isTyping && (
-                     <div className="text-xs text-gray-500 px-2">
-                        Assistant is typing…
+                     <div className="text-x text-gray-500 px-2">
+                        Responding…
                      </div>
                   )}
                </div>
