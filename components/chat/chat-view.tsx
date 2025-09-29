@@ -8,7 +8,7 @@ import Link from "next/link";
 import {
    useThreads,
    appendMessage,
-   fakeAssistantReply,
+   fetchBotReply,
 } from "@/lib/chat-store";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -42,20 +42,23 @@ export function ChatView({ threadId }: { threadId: string }) {
       return () => clearTimeout(id);
    }, [thread?.messages.length]);
 
-   function handleSend(text: string) {
+   async function handleSend(text: string) {
+      // append user message immediately
       update((prev) =>
-         appendMessage(prev, threadId, { role: "user", content: text })
+        appendMessage(prev, threadId, { role: "user", content: text })
       );
-      // Simulated assistant reply
-      setTimeout(() => {
-         update((prev) =>
-            appendMessage(prev, threadId, {
-               role: "assistant",
-               content: fakeAssistantReply(text),
-            })
-         );
-      }, 400);
-   }
+    
+      // fetch assistant reply
+      const reply = await fetchBotReply(text);
+    
+      // append assistant reply once ready
+      update((prev) =>
+        appendMessage(prev, threadId, {
+          role: "assistant",
+          content: reply,
+        })
+      );
+    }
 
    if (!thread) return null;
 
