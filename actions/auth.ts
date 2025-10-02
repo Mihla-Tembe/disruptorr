@@ -8,7 +8,7 @@ import {
   type SignUpValues,
 } from "@/types";
 import { createClient } from "@supabase/supabase-js";
-import { signToken, verifyToken } from '@/lib/auth/session';
+import { setSession } from '@/lib/auth/session';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -20,14 +20,15 @@ function getJwtSecret() {
 }
 
 async function setSessionCookie(accessToken: string) {
-  const cookieStore = cookies();
-  (await cookieStore).set("session", accessToken, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7,
-  });
+  // Create our own session cookie from Supabase user info
+  try {
+    const { data } = await supabase.auth.getUser(accessToken);
+    if (data?.user?.id) {
+      await setSession({ id: data.user.id, email: data.user.email ?? undefined });
+    }
+  } catch (_) {
+    // fallback: do nothing; middleware will treat as guest
+  }
 }
 
 export async function signUpAction(values: SignUpValues) {

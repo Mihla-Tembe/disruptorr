@@ -18,7 +18,8 @@ import {
 import { SignUpSchema, type SignUpValues } from "@/types";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
-import { signUp } from "@/lib/supabase"; // ✅ Supabase sign-up method
+import { useAuth } from "@/components/providers/auth-provider";
+import { signUpAction } from "@/actions/auth";
 
 export function SignUpForm({
    onSubmitAction,
@@ -39,16 +40,22 @@ export function SignUpForm({
 
   const [submitting, setSubmitting] = React.useState(false);
   const router = useRouter();
+  const { refresh } = useAuth();
 
   async function handleSubmit(values: SignUpValues) {
     try {
       setSubmitting(true);
 
-      const res = onSubmitAction
+      const result = onSubmitAction
       ? await onSubmitAction(values)
-      : await signUp(values.email, values.password);
+      : await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values)
+      }).then(r => r.ok ? { ok: true } : r.json());
 
-      if (res) {
+      if ((result as any)?.ok || result === undefined) {
+        try { await refresh(); } catch {}
         router.push("/dashboard");
       }
     } catch (error) {

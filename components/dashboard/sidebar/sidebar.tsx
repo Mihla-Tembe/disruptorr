@@ -51,6 +51,9 @@ export function Sidebar({
    collapsed,
    onToggleCollapse,
 }: SidebarProps) {
+   const [mounted, setMounted] = React.useState(false);
+   React.useEffect(() => setMounted(true), []);
+
    const pathname = usePathname();
    const router = useRouter();
    const { status } = useAuth();
@@ -119,6 +122,10 @@ export function Sidebar({
    function hasActiveDescendant(items?: NavItem[]): boolean {
       if (!items || items.length === 0) return false;
       return items.some(navItemIsActive);
+   }
+
+   if (!mounted) {
+      return null;
    }
 
    return (

@@ -10,7 +10,7 @@ const SECRET = process.env.AUTH_SECRET!;
 const encoder = new TextEncoder();
 const key = encoder.encode(SECRET);
 
-export type NewUser = { id: number; email?: string };
+export type NewUser = { id: string; email?: string };
 
 // -----------------------
 // Password utilities
@@ -32,7 +32,7 @@ export async function comparePasswords(
 // Session / JWT
 // -----------------------
 export type SessionData = {
-  user: { id: number };
+  user: { id: string; email?: string };
   expires: string;
 };
 
@@ -42,6 +42,7 @@ export async function signToken(payload: SessionData): Promise<string> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('1d') // 1 day
+    .setSubject(payload.user.id)
     .sign(key);
 }
 
@@ -71,7 +72,7 @@ export async function getSession(): Promise<SessionData | null> {
 export async function setSession(user: NewUser) {
   const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 1 day
   const session: SessionData = {
-    user: { id: user.id },
+    user: { id: user.id, email: user.email },
     expires: expires.toISOString(),
   };
 

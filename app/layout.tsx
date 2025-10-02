@@ -27,8 +27,8 @@ export default function RootLayout({
    children: React.ReactNode;
 }>) {
    return (
-      <html lang="en" className={funnelDisplay.variable}>
-         <body className="antialiased font-sans relative">
+      <html lang="en" className={funnelDisplay.variable} suppressHydrationWarning>
+         <body className="antialiased font-sans relative" suppressHydrationWarning>
             <Image
                src={PatternBg}
                alt=""

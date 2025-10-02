@@ -10,13 +10,16 @@ function getJwtSecret() {
   return new TextEncoder().encode(process.env.AUTH_SECRET ?? "dev-secret")
 }
 
-async function getUserIdFromSession(): Promise<string | null> {
+async function getUserIdFromSession(): Promise<{ id: string; email?: string } | null> {
   const cookieStore = await cookies()
   const token = cookieStore.get("session")?.value
   if (!token) return null
   try {
     const { payload } = await jwtVerify(token, getJwtSecret())
-    return String(payload.sub ?? "") || null
+    const id = String(payload.sub ?? "")
+    if (!id) return null
+    const email = typeof payload.user === 'object' && payload.user && typeof (payload.user as any).email === 'string' ? (payload.user as any).email : undefined
+    return { id, email }
   } catch {
     return null
   }
@@ -62,14 +65,16 @@ export async function getProfileAction(): Promise<
   | { ok: true; profile: { firstName: string; lastName: string; email: string } }
   | { ok: false; error: string }
 > {
-  const uid = await getUserIdFromSession()
-  if (!uid) return { ok: false, error: "Not authenticated" }
-  const users = await readUsers()
-  const user = users.find((u) => u.id === uid)
-  if (!user) return { ok: false, error: "User not found" }
-  const [firstName = "", ...rest] = user.fullName.split(" ")
+  const session = await getUserIdFromSession()
+  if (!session) return { ok: false, error: "Not authenticated" }
+  // Try to read local users file for name (fallback), but if missing, still return email
+  const users = await readUsers().catch(() => [])
+  const user = users.find((u) => u.id === session.id)
+  const fullName = user?.fullName ?? ""
+  const [firstName = "", ...rest] = fullName.split(" ")
   const lastName = rest.join(" ")
-  return { ok: true, profile: { firstName, lastName, email: user.email } }
+  const email = session.email ?? user?.email ?? ""
+  return { ok: true, profile: { firstName, lastName, email } }
 }
 
 export async function updateProfileAction(input: {

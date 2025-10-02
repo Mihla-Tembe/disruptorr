@@ -24,6 +24,9 @@ export function DashboardLayout({
    contentClassName?: string;
    mainClassName?: string;
 }) {
+   const [mounted, setMounted] = React.useState(false);
+   React.useEffect(() => setMounted(true), []);
+
    const pathname = usePathname();
    const isDashboardHome = pathname === "/dashboard";
    const [sidebarOpen, setSidebarOpen] = React.useState(false);
@@ -54,8 +57,13 @@ export function DashboardLayout({
 
    const resolvedContentClassName = cn(baseContentClassName, contentClassName);
 
+   if (!mounted) {
+      return null;
+   }
+
    return (
       <div
+         suppressHydrationWarning
          className={
             collapsed
                ? "grid min-h-screen md:grid-cols-[4rem_1fr] bg-primary relative"

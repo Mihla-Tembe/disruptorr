@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignInSchema, type SignInValues } from "@/types";
 import { useRouter } from "next/navigation";
-import { signIn } from "@/lib/supabase"; // Supabase sign-in function
+import { signInAction } from "@/actions/auth";
 import { useSearchParams } from "next/navigation";
 
 import {
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/components/providers/auth-provider";
 
 export function SignInForm({
    onSubmitAction,
@@ -38,15 +39,21 @@ export function SignInForm({
    const router = useRouter();
    const searchParams = useSearchParams();
    const next = (searchParams as URLSearchParams).get("next") ?? "/dashboard";
+   const { refresh } = useAuth();
 
    async function handleSubmit(values: SignInValues) {
       try {
          setSubmitting(true);
-         const res = onSubmitAction
+         const result = onSubmitAction
          ? await onSubmitAction(values)
-         : await signIn(values.email, values.password);
+         : await fetch('/api/auth/signin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(values)
+         }).then(r => r.ok ? { ok: true } : r.json());
 
-         if (res) {
+         if ((result as any)?.ok || result === undefined) {
+            try { await refresh(); } catch {}
             router.push(next);
          }
       } catch (error) {
