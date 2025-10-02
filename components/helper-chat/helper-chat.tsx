@@ -68,7 +68,6 @@ export function HelperChat() {
   const pathname = usePathname()
   const viewportRef = useRef<HTMLDivElement | null>(null)
   const listRef = useRef<HTMLDivElement | null>(null)
-  const prevPath = useRef<string | null>(null)
 
   // --- endpoint fetch ---
   async function fetchBotReply(userText: string): Promise<string> {

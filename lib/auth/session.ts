@@ -3,8 +3,6 @@ import bcrypt from 'bcrypt';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
-const SALT_ROUNDS = 10;
-
 // Make sure your secret is at least 32 characters
 const SECRET = process.env.AUTH_SECRET!;
 const encoder = new TextEncoder();
@@ -15,11 +13,6 @@ export type NewUser = { id: string; email?: string };
 // -----------------------
 // Password utilities
 // -----------------------
-
-async function hashPassword(password: string) {
-  const hashed = await bcrypt.hash(password, SALT_ROUNDS);
-  return hashed;
-}
 
 export async function comparePasswords(
   plainTextPassword: string,
