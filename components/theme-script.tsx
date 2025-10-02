@@ -8,7 +8,6 @@ export function ThemeScript() {
       document.documentElement.classList.remove('dark');
     }
   } catch (e) {}
-  `
-  return <script dangerouslySetInnerHTML={{ __html: code }} />
+  `;
+  return <script dangerouslySetInnerHTML={{ __html: code }} />;
 }
-
