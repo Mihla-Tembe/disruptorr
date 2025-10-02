@@ -1,9 +1,15 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { UserMenu } from "@/components/dashboard/user-menu"
+import * as React from "react";
+import { UserMenu } from "@/components/dashboard/user-menu";
 
-export function ChatLayout({ sidebar, children }: { sidebar: React.ReactNode; children: React.ReactNode }) {
+export function ChatLayout({
+  sidebar,
+  children,
+}: {
+  sidebar: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <div className="grid h-screen grid-cols-[18rem_1fr] bg-background">
       {sidebar}
@@ -15,6 +21,5 @@ export function ChatLayout({ sidebar, children }: { sidebar: React.ReactNode; ch
         <div className="h-2" />
       </main>
     </div>
-  )
+  );
 }
-

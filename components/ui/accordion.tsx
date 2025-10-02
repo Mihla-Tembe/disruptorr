@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import * as AccordionPrimitive from "@radix-ui/react-accordion"
+import * as React from "react";
+import * as AccordionPrimitive from "@radix-ui/react-accordion";
 
-import { cn } from "@/lib/utils"
-import Image from "next/image"
-import ArrowIcon from "@/public/icons/right.svg"
+import { cn } from "@/lib/utils";
+import Image from "next/image";
+import ArrowIcon from "@/public/icons/right.svg";
 
-const Accordion = AccordionPrimitive.Root
+const Accordion = AccordionPrimitive.Root;
 
 function AccordionItem({
   className,
@@ -19,7 +19,7 @@ function AccordionItem({
       className={cn("border-b border-transparent", className)}
       {...props}
     />
-  )
+  );
 }
 
 function AccordionTrigger({
@@ -33,7 +33,7 @@ function AccordionTrigger({
         data-slot="accordion-trigger"
         className={cn(
           "flex flex-1 items-center justify-between py-2 text-left text-sm font-medium transition-all hover:text-foreground/90 [&[data-state=open]>.accordion-chevron]:-rotate-90",
-          className
+          className,
         )}
         {...props}
       >
@@ -48,7 +48,7 @@ function AccordionTrigger({
         />
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
-  )
+  );
 }
 
 function AccordionContent({
@@ -60,11 +60,11 @@ function AccordionContent({
       data-slot="accordion-content"
       className={cn(
         "overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
-export { Accordion, AccordionItem, AccordionTrigger, AccordionContent }
+export { Accordion, AccordionItem, AccordionTrigger, AccordionContent };

@@ -22,13 +22,13 @@ Disruptor is a Next.js application that unifies authenticated dashboards with a 
 
 Prerequisites: Node.js 18+ and npm (or pnpm/yarn).
 
-1) Install dependencies
+1. Install dependencies
 
 ```bash
 npm install
 ```
 
-2) Configure environment
+2. Configure environment
 
 Create a `.env.local` file with at least:
 
@@ -36,7 +36,7 @@ Create a `.env.local` file with at least:
 AUTH_SECRET=replace-with-a-long-random-string
 ```
 
-3) Run the dev server
+3. Run the dev server
 
 ```bash
 npm run dev
@@ -157,6 +157,9 @@ npm run start
 ---
 
 If you have questions or want help extending the app (auth hardening, chat backend, or additional dashboards), open an issue or reach out.
+
 # disruptortwo
+
 # disruptorr
+
 # disruptorr
