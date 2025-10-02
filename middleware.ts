@@ -1,60 +1,49 @@
-import { NextRequest, NextResponse } from "next/server"
-import { jwtVerify } from "jose"
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { signToken, verifyToken } from '@/lib/auth/session';
 
-function getJwtSecret() {
-  return new TextEncoder().encode(process.env.AUTH_SECRET ?? "dev-secret")
-}
+const protectedRoutes = '/dashboard';
 
-async function hasValidSession(req: NextRequest) {
-  const token = req.cookies.get("session")?.value
-  if (!token) return false
-  try {
-    await jwtVerify(token, getJwtSecret())
-    return true
-  } catch {
-    return false
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const sessionCookie = request.cookies.get('session');
+  const isProtectedRoute = pathname.startsWith(protectedRoutes);
+
+  if (isProtectedRoute && !sessionCookie) {
+    return NextResponse.redirect(new URL('/signin', request.url));
   }
-}
 
-export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl
-  const isAuthed = await hasValidSession(req)
-  const publicAuthRoutes = new Set(["/", "/signin", "/signup"])
-  const isArticleRoute = pathname === "/news" || pathname.startsWith("/news/")
-  const isTermsRoute = pathname === "/terms" || pathname.startsWith("/terms/")
+  let res = NextResponse.next();
 
-  if (!isAuthed) {
-    if (!publicAuthRoutes.has(pathname) && !isArticleRoute && !isTermsRoute) {
-      const url = req.nextUrl.clone()
-      url.pathname = "/signin"
-      url.searchParams.set("next", pathname)
-      return NextResponse.redirect(url)
+  if (sessionCookie && request.method === 'GET') {
+    try {
+      const parsed = await verifyToken(sessionCookie.value);
+      const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+      res.cookies.set({
+        name: 'session',
+        value: await signToken({
+          ...parsed,
+          expires: expiresInOneDay.toISOString()
+        }),
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        expires: expiresInOneDay
+      });
+    } catch (error) {
+      console.error('Error updating session:', error);
+      res.cookies.delete('session');
+      if (isProtectedRoute) {
+        return NextResponse.redirect(new URL('/signin', request.url));
+      }
     }
   }
 
-  // Protect dashboard
-  if (pathname.startsWith("/dashboard")) {
-    if (!isAuthed) {
-      const url = req.nextUrl.clone()
-      url.pathname = "/signin"
-      url.searchParams.set("next", pathname)
-      return NextResponse.redirect(url)
-    }
-    return NextResponse.next()
-  }
-
-  // Prevent visiting auth pages when already signed in
-  if (pathname === "/" || pathname.startsWith("/signin")) {
-    if (isAuthed) {
-      const url = req.nextUrl.clone()
-      url.pathname = "/dashboard"
-      return NextResponse.redirect(url)
-    }
-  }
-
-  return NextResponse.next()
+  return res;
 }
 
 export const config = {
-  matcher: ["/", "/signin", "/signup", "/dashboard/:path*", "/terms/:path*", "/privacy/:path*", "/news/:path*"],
-}
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  runtime: 'nodejs'
+};

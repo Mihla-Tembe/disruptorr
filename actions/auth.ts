@@ -2,150 +2,109 @@
 
 import { cookies } from "next/headers";
 import {
-   SignInSchema,
-   SignUpSchema,
-   type SignInValues,
-   type SignUpValues,
+  SignInSchema,
+  SignUpSchema,
+  type SignInValues,
+  type SignUpValues,
 } from "@/types";
-import { promises as fs } from "fs";
-import path from "path";
-import crypto from "crypto";
-import { SignJWT } from "jose";
+import { createClient } from "@supabase/supabase-js";
+import { signToken, verifyToken } from '@/lib/auth/session';
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const USERS_FILE = path.join(DATA_DIR, "users.json");
-
-async function ensureDataFile() {
-   try {
-      await fs.mkdir(DATA_DIR, { recursive: true });
-      await fs.access(USERS_FILE);
-   } catch {
-      await fs.writeFile(USERS_FILE, JSON.stringify({ users: [] }, null, 2));
-   }
-}
-
-type StoredUser = {
-   id: string;
-   fullName: string;
-   email: string;
-   passwordHash: string;
-   createdAt: string;
-};
-
-async function readUsers(): Promise<StoredUser[]> {
-   await ensureDataFile();
-   const raw = await fs.readFile(USERS_FILE, "utf-8");
-   const parsed = JSON.parse(raw) as { users: StoredUser[] };
-   return Array.isArray(parsed.users) ? parsed.users : [];
-}
-
-async function writeUsers(users: StoredUser[]) {
-   // Write user to firebase
-   await ensureDataFile();
-   await fs.writeFile(USERS_FILE, JSON.stringify({ users }, null, 2));
-}
-
-function hashPassword(pw: string) {
-   return crypto.createHash("sha256").update(pw).digest("hex");
-}
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 function getJwtSecret() {
-   return new TextEncoder().encode(process.env.AUTH_SECRET ?? "dev-secret");
+  return new TextEncoder().encode(process.env.AUTH_SECRET ?? "dev-secret");
 }
 
-async function setSessionCookie(user: StoredUser) {
-   const token = await new SignJWT({ email: user.email, name: user.fullName })
-      .setProtectedHeader({ alg: "HS256" })
-      .setSubject(user.id)
-      .setIssuedAt()
-      .setExpirationTime("7d")
-      .sign(getJwtSecret());
-
-   const cookieStore = await cookies();
-   cookieStore.set("session", token, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7,
-   });
+async function setSessionCookie(accessToken: string) {
+  const cookieStore = cookies();
+  (await cookieStore).set("session", accessToken, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
 }
 
 export async function signUpAction(values: SignUpValues) {
-   const parsed = SignUpSchema.safeParse(values);
-   if (!parsed.success) {
-      return { ok: false, error: parsed.error.flatten() };
-   }
+  const parsed = SignUpSchema.safeParse(values);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.flatten() };
+  }
 
-   const users = await readUsers();
-   const existing = users.find(
-      (u) => u.email.toLowerCase() === parsed.data.email.toLowerCase()
-   );
-   if (existing) {
-      return {
-         ok: false,
-         error: { formErrors: ["Email already registered"], fieldErrors: {} },
-      };
-   }
+  const { data, error } = await supabase.auth.signUp({
+    email: parsed.data.email,
+    password: parsed.data.password,
+    options: {
+      data: {
+        fullName: parsed.data.fullName,
+      },
+    },
+  });
 
-   const user: StoredUser = {
-      id: crypto.randomUUID(),
+  if (error) {
+    return {
+      ok: false,
+      error: { formErrors: [error.message], fieldErrors: {} },
+    };
+  }
+
+  if (data.session?.access_token) {
+    await setSessionCookie(data.session.access_token);
+  }
+
+  return {
+    ok: true,
+    user: {
+      id: data.user?.id ?? "",
       fullName: parsed.data.fullName,
       email: parsed.data.email,
-      passwordHash: hashPassword(parsed.data.password),
-      createdAt: new Date().toISOString(),
-   };
-
-   users.push(user);
-   await writeUsers(users);
-   await setSessionCookie(user);
-
-   return {
-      ok: true,
-      user: { id: user.id, fullName: user.fullName, email: user.email },
-   };
+    },
+  };
 }
 
 export async function signInAction(values: SignInValues) {
-   const parsed = SignInSchema.safeParse(values);
-   if (!parsed.success) {
-      return { ok: false, error: parsed.error.flatten() };
-   }
+  const parsed = SignInSchema.safeParse(values);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.flatten() };
+  }
 
-   const users = await readUsers();
-   const user = users.find(
-      (u) => u.email.toLowerCase() === parsed.data.email.toLowerCase()
-   );
-   if (!user) {
-      return {
-         ok: false,
-         error: { formErrors: ["Invalid email or password"], fieldErrors: {} },
-      };
-   }
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  });
 
-   const matches = user.passwordHash === hashPassword(parsed.data.password);
-   if (!matches) {
-      return {
-         ok: false,
-         error: { formErrors: ["Invalid email or password"], fieldErrors: {} },
-      };
-   }
+  if (error || !data.session?.access_token) {
+    return {
+      ok: false,
+      error: { formErrors: ["Invalid email or password"], fieldErrors: {} },
+    };
+  }
 
-   await setSessionCookie(user);
-   return {
-      ok: true,
-      user: { id: user.id, fullName: user.fullName, email: user.email },
-   };
+  await setSessionCookie(data.session.access_token);
+
+  return {
+    ok: true,
+    user: {
+      id: data.user?.id ?? "",
+      fullName: data.user?.user_metadata?.fullName ?? "",
+      email: data.user?.email ?? "",
+    },
+  };
 }
 
 export async function signOutAction() {
-   const cookieStore = await cookies();
-   cookieStore.set("session", "", {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: 0,
-   });
-   return { ok: true };
+  const cookieStore = cookies();
+  (await cookieStore).set("session", "", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 0,
+  });
+  return { ok: true };
 }

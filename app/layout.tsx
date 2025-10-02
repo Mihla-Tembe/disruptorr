@@ -7,6 +7,7 @@ import { AuthProvider } from "@/components/providers/auth-provider";
 import PatternBg from "@/public/pattern-bg.png";
 import Image from "next/image";
 import { Funnel_Display } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next"
 
 const funnelDisplay = Funnel_Display({
    subsets: ["latin"],
@@ -41,6 +42,7 @@ export default function RootLayout({
                <AuthProvider>
                   {children}
                   <Toaster />
+                  <Analytics/>
                </AuthProvider>
             </ToastProviderInternal>
          </body>

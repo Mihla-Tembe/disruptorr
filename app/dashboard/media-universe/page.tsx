@@ -8,7 +8,7 @@ export default function MediaUniversePage() {
             title="Media Universe"
             description="Unified view of cross-channel momentum and market impact."
          />
-         <div className="relative w-full" style={{ aspectRatio: "16 / 12.5" }}>
+         <div className="relative w-full" style={{ aspectRatio: "16 / 9" }}>
             <iframe
                className="absolute top-0 left-0 w-full h-full"
                src="https://lookerstudio.google.com/embed/reporting/45c4136a-d522-44a8-9b67-b09c17554aad/page/p_1nyry5wxvd"

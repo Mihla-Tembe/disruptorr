@@ -6,7 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignInSchema, type SignInValues } from "@/types";
 import { useRouter } from "next/navigation";
-import { signInAction } from "@/actions/auth";
+import { signIn } from "@/lib/supabase"; // Supabase sign-in function
+import { useSearchParams } from "next/navigation";
 
 import {
    Form,
@@ -19,12 +20,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-// Schema centralized in types/index.ts
-
 export function SignInForm({
-   onSubmit,
+   onSubmitAction,
 }: {
-   onSubmit?: (values: SignInValues) => Promise<void> | void;
+  onSubmitAction?: (values: SignInValues) => Promise<void> | void;
 }) {
    const form = useForm<SignInValues>({
       resolver: zodResolver(SignInSchema),
@@ -37,16 +36,22 @@ export function SignInForm({
 
    const [submitting, setSubmitting] = React.useState(false);
    const router = useRouter();
+   const searchParams = useSearchParams();
+   const next = (searchParams as URLSearchParams).get("next") ?? "/dashboard";
 
    async function handleSubmit(values: SignInValues) {
       try {
          setSubmitting(true);
-         const res = (onSubmit
-            ? await onSubmit(values)
-            : await signInAction(values)) as unknown as { ok?: boolean } | void;
-         if (res && "ok" in res && res.ok) {
-            router.push("/dashboard");
+         const res = onSubmitAction
+         ? await onSubmitAction(values)
+         : await signIn(values.email, values.password);
+
+         if (res) {
+            router.push(next);
          }
+      } catch (error) {
+         console.error("Sign in failed:", error);
+         // Optionally show error to user
       } finally {
          setSubmitting(false);
       }
@@ -64,9 +69,7 @@ export function SignInForm({
          </div>
 
          <Form {...form}>
-            <form
-               onSubmit={form.handleSubmit(handleSubmit)}
-               className="space-y-6">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
                <FormField
                   control={form.control}
                   name="email"
@@ -119,9 +122,7 @@ export function SignInForm({
          <div className="mt-10 border-t border-white/15 pt-8 text-center text-sm text-white/80">
             <p>
                Don&apos;t have an account?{" "}
-               <Link
-                  href="/signup"
-                  className="font-semibold text-[#6BE9A0] hover:underline">
+               <Link href="/signup" className="font-semibold text-[#6BE9A0] hover:underline">
                   Sign Up
                </Link>
             </p>

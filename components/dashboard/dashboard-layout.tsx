@@ -49,7 +49,7 @@ export function DashboardLayout({
 
       return isDashboardHome
          ? "w-full px-0 pb-24 pt-0"
-         : "mx-auto w-full max-w-1xl px-4 pb-12 pt-4";
+         : "mx-auto w-full max-w-1xl px-4 pb-24 pt-4";
    }, [fullWidth, isDashboardHome]);
 
    const resolvedContentClassName = cn(baseContentClassName, contentClassName);
