@@ -98,7 +98,7 @@ export async function updateProfileAction(input: {
   const wantsPasswordChange = Boolean(input.newPassword || input.confirmNewPassword)
 
   const users = await readUsers()
-  const idx = users.findIndex((u) => u.id === uid)
+  const idx = users.findIndex((u) => u.id === uid.id)
   if (idx === -1) return { ok: false, error: "User not found" }
 
   if (wantsPasswordChange) {
@@ -110,7 +110,7 @@ export async function updateProfileAction(input: {
 
   // Ensure email is unique if changed
   const emailOwner = users.find((u) => u.email.toLowerCase() === email.toLowerCase())
-  if (emailOwner && emailOwner.id !== uid) return { ok: false, error: "Email already in use" }
+  if (emailOwner && emailOwner.id !== uid.id) return { ok: false, error: "Email already in use" }
 
   const user = users[idx]
   const fullName = `${firstName} ${lastName}`.trim()
@@ -129,7 +129,7 @@ export async function deleteAccountAction(): Promise<{ ok: boolean; error?: stri
   const uid = await getUserIdFromSession()
   if (!uid) return { ok: false, error: "Not authenticated" }
   const users = await readUsers()
-  const next = users.filter((u) => u.id !== uid)
+  const next = users.filter((u) => u.id !== uid.id)
   if (next.length === users.length) return { ok: false, error: "User not found" }
   await writeUsers(next)
   // clear session cookie

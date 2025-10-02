@@ -19,7 +19,7 @@ import { SignUpSchema, type SignUpValues } from "@/types";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/components/providers/auth-provider";
-import { signUpAction } from "@/actions/auth";
+//
 
 export function SignUpForm({
    onSubmitAction,
@@ -54,7 +54,7 @@ export function SignUpForm({
         body: JSON.stringify(values)
       }).then(r => r.ok ? { ok: true } : r.json());
 
-      if ((result as any)?.ok || result === undefined) {
+      if ((result as { ok?: boolean } | undefined)?.ok || result === undefined) {
         try { await refresh(); } catch {}
         router.push("/dashboard");
       }

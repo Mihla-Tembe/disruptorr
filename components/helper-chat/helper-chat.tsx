@@ -5,7 +5,6 @@ import React, {
   useRef,
   useState,
   type FormEvent,
-  type KeyboardEvent,
 } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -55,7 +54,7 @@ export function HelperChat() {
   const [open, setOpen] = useState(false)
   const [show, setShow] = useState(false)
   const [input, setInput] = useState("")
-  const [unread, setUnread] = useState(0)
+  const [unread] = useState(0)
   const [messages, setMessages] = useState<Message[]>(() => {
     try {
       const cached = sessionStorage.getItem("chatbot_messages")

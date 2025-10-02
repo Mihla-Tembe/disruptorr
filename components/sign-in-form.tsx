@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignInSchema, type SignInValues } from "@/types";
 import { useRouter } from "next/navigation";
-import { signInAction } from "@/actions/auth";
+//
 import { useSearchParams } from "next/navigation";
 
 import {
@@ -52,7 +52,7 @@ export function SignInForm({
             body: JSON.stringify(values)
          }).then(r => r.ok ? { ok: true } : r.json());
 
-         if ((result as any)?.ok || result === undefined) {
+         if ((result as { ok?: boolean } | undefined)?.ok || result === undefined) {
             try { await refresh(); } catch {}
             router.push(next);
          }

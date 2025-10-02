@@ -1,5 +1,3 @@
-import Script from 'next/script';
-
 export function ThemeScript() {
   const code = `
   try {
@@ -11,10 +9,7 @@ export function ThemeScript() {
     }
   } catch (e) {}
   `
-  return (
-    <Script id="theme-init" strategy="beforeInteractive">
-      {code}
-    </Script>
-  );
+  // In the App Router, an inline script is acceptable; it runs early in body
+  return <script dangerouslySetInnerHTML={{ __html: code }} suppressHydrationWarning />
 }
 

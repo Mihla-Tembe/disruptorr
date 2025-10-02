@@ -110,7 +110,7 @@ export function ChatSidebar({
 }) {
    const { threads, newThread, setThreads, removeThread, ensureThread } =
       useThreads();
-   const pathname = usePathname();
+   // const pathname = usePathname();
    const router = useRouter();
    const [query, setQuery] = React.useState("");
    const [editingId, setEditingId] = React.useState<string | null>(null);
