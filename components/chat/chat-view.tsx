@@ -18,29 +18,29 @@ import BackHomeIcon from "@/public/icons/back-home-icon.svg";
 import CreateIcon from "@/public/icons/create.svg";
 
 export function ChatView({ threadId }: { threadId: string }) {
-  const { threads, update, newThread } = useThreads();
-  const router = useRouter();
-  const thread = React.useMemo(
-    () => threads.find((t) => t.id === threadId),
-    [threads, threadId],
-  );
-  const viewportRef = React.useRef<HTMLDivElement>(null);
+   const { threads, update, newThread } = useThreads();
+   const router = useRouter();
+   const thread = React.useMemo(
+      () => threads.find((t) => t.id === threadId),
+      [threads, threadId]
+   );
+   const viewportRef = React.useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
-    // scroll to bottom on thread change
-    viewportRef.current?.scrollTo({ top: viewportRef.current.scrollHeight });
-  }, [threadId]);
+   React.useEffect(() => {
+      // scroll to bottom on thread change
+      viewportRef.current?.scrollTo({ top: viewportRef.current.scrollHeight });
+   }, [threadId]);
 
-  React.useEffect(() => {
-    // autoscroll as messages arrive
-    const id = setTimeout(() => {
-      viewportRef.current?.scrollTo({
-        top: viewportRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }, 0);
-    return () => clearTimeout(id);
-  }, [thread?.messages.length]);
+   React.useEffect(() => {
+      // autoscroll as messages arrive
+      const id = setTimeout(() => {
+         viewportRef.current?.scrollTo({
+            top: viewportRef.current.scrollHeight,
+            behavior: "smooth",
+         });
+      }, 0);
+      return () => clearTimeout(id);
+   }, [thread?.messages.length]);
 
    const [isTyping, setIsTyping] = React.useState(false)
 
@@ -64,7 +64,7 @@ export function ChatView({ threadId }: { threadId: string }) {
       setIsTyping(false)
     }
 
-  if (!thread) return null;
+   if (!thread) return null;
 
    return (
       <div className="mx-auto w-full">
@@ -142,35 +142,5 @@ export function ChatView({ threadId }: { threadId: string }) {
             </p>
          </div>
       </div>
-      <div
-        className={`rounded-2xl ${
-          thread.messages.length === 0
-            ? "flex flex-col justify-end h-[60vh] max-w-3xl mx-auto"
-            : "h-[75vh]"
-        }`}
-      >
-        <ScrollArea
-          className={`pb-6 ${thread.messages.length === 0 ? "" : "h-[70vh]"}`}
-        >
-          <div ref={viewportRef} className="flex flex-col gap-6 p-2">
-            {thread.messages.length === 0 ? (
-              <div className="flex flex-col">
-                <h1 className="space-grotesk text-6xl leading-18 mb-2">
-                  Where questions spark clarity and exploration powers impact
-                </h1>
-              </div>
-            ) : (
-              thread.messages.map((m) => (
-                <ChatBubble key={m.id} message={m} threadId={threadId} />
-              ))
-            )}
-          </div>
-        </ScrollArea>
-        <ChatComposer onSend={handleSend} />
-        <p className="mt-3 text-center text-xs text-muted-foreground">
-          AI generated content may be incorrect.
-        </p>
-      </div>
-    </div>
-  );
+   );
 }
