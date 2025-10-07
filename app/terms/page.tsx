@@ -51,8 +51,13 @@ export default function TermsPage() {
             <header className="space-y-3">
               <div className="inline-flex items-center gap-3 rounded-full bg-emerald-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:bg-[#04271f] dark:text-[#66ffa3]">
                 <span>Please read this thoroughly</span>
-                <span className="h-2 w-2 rounded-full bg-emerald-400 dark:bg-[#66ffa3]" aria-hidden />
-                <span className="dark:text-[#66ffa3]">Updated {TERMS_UPDATED_AT}</span>
+                <span
+                  className="h-2 w-2 rounded-full bg-emerald-400 dark:bg-[#66ffa3]"
+                  aria-hidden
+                />
+                <span className="dark:text-[#66ffa3]">
+                  Updated {TERMS_UPDATED_AT}
+                </span>
               </div>
               <h1
                 id="terms-heading"
@@ -61,7 +66,9 @@ export default function TermsPage() {
                 Terms & Conditions
               </h1>
               <p className="max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-[#9ef0c3]">
-                These guidelines protect your team, data, and the momentum you build with Disruptor. Keep them handy and share them with anyone who needs platform access.
+                These guidelines protect your team, data, and the momentum you
+                build with Disruptor. Keep them handy and share them with anyone
+                who needs platform access.
               </p>
             </header>
 

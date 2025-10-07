@@ -38,7 +38,7 @@ export function createThread(title = "New Chat"): ChatThread {
 export function appendMessage(
   threads: ChatThread[],
   threadId: string,
-  msg: Omit<ChatMessage, "id" | "createdAt">
+  msg: Omit<ChatMessage, "id" | "createdAt">,
 ): ChatThread[] {
   const next = threads.map((t) => {
     if (t.id !== threadId) return t;
@@ -65,12 +65,12 @@ export function updateMessageMeta(
   threads: ChatThread[],
   threadId: string,
   messageId: string,
-  meta: ChatMessageMeta
+  meta: ChatMessageMeta,
 ): ChatThread[] {
   return threads.map((t) => {
     if (t.id !== threadId) return t;
     const messages = t.messages.map((m) =>
-      m.id === messageId ? { ...m, meta: { ...m.meta, ...meta } } : m
+      m.id === messageId ? { ...m, meta: { ...m.meta, ...meta } } : m,
     );
     return { ...t, messages, updatedAt: new Date().toISOString() };
   });
@@ -117,14 +117,14 @@ export function useThreads() {
         .slice()
         .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
     },
-    [threads, hydrated]
+    [threads, hydrated],
   );
 
   const update = React.useCallback(
     (mutator: (prev: ChatThread[]) => ChatThread[]) => {
       setThreads((prev) => mutator(prev));
     },
-    [setThreads]
+    [setThreads],
   );
 
   const removeThread = React.useCallback((id: string) => {
@@ -137,7 +137,15 @@ export function useThreads() {
     return t;
   }, []);
 
-  return { hydrated, threads, setThreads, update, ensureThread, removeThread, newThread };
+  return {
+    hydrated,
+    threads,
+    setThreads,
+    update,
+    ensureThread,
+    removeThread,
+    newThread,
+  };
 }
 
 /**
@@ -145,7 +153,8 @@ export function useThreads() {
  */
 export async function fetchBotReply(userText: string): Promise<string> {
   try {
-    const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
+    const isLocal =
+      typeof window !== "undefined" && window.location.hostname === "localhost";
     const endpoint = isLocal
       ? "http://localhost:3000/vdc200007-disruptor-prod/chat"
       : "https://us-central1-vdc200007-disruptor-prod.cloudfunctions.net/chat2";

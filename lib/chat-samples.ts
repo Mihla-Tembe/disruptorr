@@ -1,4 +1,4 @@
-import type { ChatThread } from "@/types"
+import type { ChatThread } from "@/types";
 
 export const sampleThreads: ChatThread[] = [
   {
@@ -16,7 +16,8 @@ export const sampleThreads: ChatThread[] = [
       {
         id: "m2",
         role: "assistant",
-        content: "Here’s a concise overview covering Mesopotamia, Egypt, the Indus Valley, and ancient China…",
+        content:
+          "Here’s a concise overview covering Mesopotamia, Egypt, the Indus Valley, and ancient China…",
         createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
       },
     ],
@@ -36,9 +37,10 @@ export const sampleThreads: ChatThread[] = [
       {
         id: "m4",
         role: "assistant",
-        content: "Search ads rose 12%, social 9%, TV down 4%. Outdoor showed the strongest recovery at +15%.",
+        content:
+          "Search ads rose 12%, social 9%, TV down 4%. Outdoor showed the strongest recovery at +15%.",
         createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
       },
     ],
   },
-]
+];

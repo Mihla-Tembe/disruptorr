@@ -8,8 +8,12 @@ export function ThemeScript() {
       document.documentElement.classList.remove('dark');
     }
   } catch (e) {}
-  `
+  `;
   // In the App Router, an inline script is acceptable; it runs early in body
-  return <script dangerouslySetInnerHTML={{ __html: code }} suppressHydrationWarning />
+  return (
+    <script
+      dangerouslySetInnerHTML={{ __html: code }}
+      suppressHydrationWarning
+    />
+  );
 }
-

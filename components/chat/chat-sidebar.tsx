@@ -7,10 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
-   Accordion,
-   AccordionContent,
-   AccordionItem,
-   AccordionTrigger,
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 import { useThreads } from "@/lib/chat-store";
@@ -18,10 +18,10 @@ import type { ChatThread } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
 import { MoreHorizontal } from "lucide-react";
 import {
-   DropdownMenu,
-   DropdownMenuContent,
-   DropdownMenuItem,
-   DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Image from "next/image";
 import Logo from "@/public/disruptor-logo.svg";
@@ -33,80 +33,80 @@ import CloseIcon from "@/public/icons/close.svg";
 import openMenuIcon from "@/public/icons/open-menu.svg";
 import closeMenuIcon from "@/public/icons/close-menu.svg";
 import {
-   PLACEHOLDER_SEARCH,
-   ARIA_SEARCH_CHATS,
-   LABEL_CHAT_HISTORY,
-   LABEL_NO_CHATS_YET,
-   BTN_UNDO,
+  PLACEHOLDER_SEARCH,
+  ARIA_SEARCH_CHATS,
+  LABEL_CHAT_HISTORY,
+  LABEL_NO_CHATS_YET,
+  BTN_UNDO,
 } from "@/constants";
 
 type Group = { label: string; items: ChatThread[] };
 
 function groupThreads(threads: ChatThread[]): Group[] {
-   const now = new Date();
-   const today: ChatThread[] = [];
-   const previous7: ChatThread[] = [];
-   const byMonth = new Map<string, ChatThread[]>();
+  const now = new Date();
+  const today: ChatThread[] = [];
+  const previous7: ChatThread[] = [];
+  const byMonth = new Map<string, ChatThread[]>();
 
-   for (const t of threads
-      .slice()
-      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))) {
-      const d = new Date(t.updatedAt);
-      const msDiff = now.getTime() - d.getTime();
-      const days = msDiff / (1000 * 60 * 60 * 24);
-      if (days < 1) today.push(t);
-      else if (days < 7) previous7.push(t);
-      else {
-         const label = d.toLocaleString(undefined, { month: "long" });
-         const arr = byMonth.get(label) ?? [];
-         arr.push(t);
-         byMonth.set(label, arr);
-      }
-   }
+  for (const t of threads
+    .slice()
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))) {
+    const d = new Date(t.updatedAt);
+    const msDiff = now.getTime() - d.getTime();
+    const days = msDiff / (1000 * 60 * 60 * 24);
+    if (days < 1) today.push(t);
+    else if (days < 7) previous7.push(t);
+    else {
+      const label = d.toLocaleString(undefined, { month: "long" });
+      const arr = byMonth.get(label) ?? [];
+      arr.push(t);
+      byMonth.set(label, arr);
+    }
+  }
 
-   const groups: Group[] = [];
-   if (today.length) groups.push({ label: "Today", items: today });
-   if (previous7.length)
-      groups.push({ label: "Previous 7 Days", items: previous7 });
-   for (const [label, items] of byMonth) groups.push({ label, items });
-   return groups;
+  const groups: Group[] = [];
+  if (today.length) groups.push({ label: "Today", items: today });
+  if (previous7.length)
+    groups.push({ label: "Previous 7 Days", items: previous7 });
+  for (const [label, items] of byMonth) groups.push({ label, items });
+  return groups;
 }
 
 function preview(t: ChatThread): string {
-   const last = t.messages.at(-1);
-   const content = last?.content ?? "Empty chat";
-   const when = last?.createdAt ?? t.updatedAt;
-   return `${truncate(content)} • ${relativeTime(when)}`;
+  const last = t.messages.at(-1);
+  const content = last?.content ?? "Empty chat";
+  const when = last?.createdAt ?? t.updatedAt;
+  return `${truncate(content)} • ${relativeTime(when)}`;
 }
 
 function truncate(s: string, n = 42) {
-   const x = s.trim().replace(/\s+/g, " ");
-   return x.length > n ? `${x.slice(0, n - 1)}…` : x;
+  const x = s.trim().replace(/\s+/g, " ");
+  return x.length > n ? `${x.slice(0, n - 1)}…` : x;
 }
 
 function relativeTime(iso: string): string {
-   const d = new Date(iso);
-   const diff = Date.now() - d.getTime();
-   const sec = Math.floor(diff / 1000);
-   if (sec < 60) return `${sec}s ago`;
-   const min = Math.floor(sec / 60);
-   if (min < 60) return `${min}m ago`;
-   const hr = Math.floor(min / 60);
-   if (hr < 24) return `${hr}h ago`;
-   const day = Math.floor(hr / 24);
-   if (day === 1) return "Yesterday";
-   if (day < 7) return `${day}d ago`;
-   return d.toLocaleDateString();
+  const d = new Date(iso);
+  const diff = Date.now() - d.getTime();
+  const sec = Math.floor(diff / 1000);
+  if (sec < 60) return `${sec}s ago`;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const day = Math.floor(hr / 24);
+  if (day === 1) return "Yesterday";
+  if (day < 7) return `${day}d ago`;
+  return d.toLocaleDateString();
 }
 
 export function ChatSidebar({
-   onClose,
-   collapsed,
-   onToggleCollapse,
+  onClose,
+  collapsed,
+  onToggleCollapse,
 }: {
-   onClose?: () => void;
-   collapsed?: boolean;
-   onToggleCollapse?: () => void;
+  onClose?: () => void;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }) {
    const { threads, newThread, setThreads, removeThread, ensureThread } =
       useThreads();
@@ -117,38 +117,38 @@ export function ChatSidebar({
    const [titleDraft, setTitleDraft] = React.useState("");
    const { toast } = useToast();
 
-   const groups = React.useMemo(() => {
-      const list = query
-         ? threads.filter((t) =>
-              t.title.toLowerCase().includes(query.toLowerCase())
-           )
-         : threads;
-      return groupThreads(list);
-   }, [threads, query]);
+  const groups = React.useMemo(() => {
+    const list = query
+      ? threads.filter((t) =>
+          t.title.toLowerCase().includes(query.toLowerCase()),
+        )
+      : threads;
+    return groupThreads(list);
+  }, [threads, query]);
 
-   const accordionDefaultValues = React.useMemo(
-      () => groups.map((g) => g.label),
-      [groups]
-   );
+  const accordionDefaultValues = React.useMemo(
+    () => groups.map((g) => g.label),
+    [groups],
+  );
 
-   const accordionKey = React.useMemo(
-      () => accordionDefaultValues.join("|"),
-      [accordionDefaultValues]
-   );
+  const accordionKey = React.useMemo(
+    () => accordionDefaultValues.join("|"),
+    [accordionDefaultValues],
+  );
 
-   function handleNew() {
-      const t = newThread();
-      router.push(`/dashboard/chat/${t.id}`);
-   }
+  function handleNew() {
+    const t = newThread();
+    router.push(`/dashboard/chat/${t.id}`);
+  }
 
-   function commitRename(id: string) {
-      const name = titleDraft.trim();
-      if (!name) return setEditingId(null);
-      setThreads((prev) =>
-         prev.map((t) => (t.id === id ? { ...t, title: name } : t))
-      );
-      setEditingId(null);
-   }
+  function commitRename(id: string) {
+    const name = titleDraft.trim();
+    if (!name) return setEditingId(null);
+    setThreads((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, title: name } : t)),
+    );
+    setEditingId(null);
+  }
 
    function handleDelete(id: string) {
       const deletingCurrent = window.location.pathname.endsWith(id);
@@ -404,7 +404,130 @@ export function ChatSidebar({
                   </Accordion>
                )}
             </div>
-         )}
-      </aside>
-   );
+          ) : (
+            <Accordion
+              key={accordionKey}
+              type="multiple"
+              defaultValue={accordionDefaultValues}
+              className="space-y-3"
+            >
+              {groups.map((g) => (
+                <AccordionItem
+                  key={g.label}
+                  value={g.label}
+                  className="border-none"
+                >
+                  <AccordionTrigger className="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wide text-white/70 hover:text-white [&>img]:hidden [&[data-state=open]_.minus-icon]:inline-flex [&[data-state=open]_.plus-icon]:hidden">
+                    <div className="flex w-full items-center justify-between gap-2">
+                      <span>{g.label}</span>
+                      <span className="flex items-center">
+                        <Image
+                          src={openMenuIcon}
+                          alt=""
+                          width={16}
+                          height={16}
+                          className="plus-icon h-4 w-4"
+                          aria-hidden={true}
+                        />
+                        <Image
+                          src={closeMenuIcon}
+                          alt=""
+                          width={16}
+                          height={16}
+                          className="minus-icon hidden h-4 w-4"
+                          aria-hidden={true}
+                        />
+                      </span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ul className="mt-2 space-y-1">
+                      {g.items.map((t) => {
+                        const active = pathname.endsWith(t.id);
+                        return (
+                          <li key={t.id}>
+                            <div
+                              className={cn(
+                                "flex items-center justify-between gap-2 px-2 py-2 text-white/80 transition-colors hover:bg-emerald-700 hover:text-white",
+                                active && "bg-emerald-600 text-white",
+                              )}
+                            >
+                              {editingId === t.id ? (
+                                <input
+                                  autoFocus
+                                  className="flex-1 truncate bg-transparent outline-none"
+                                  value={titleDraft}
+                                  onChange={(e) =>
+                                    setTitleDraft(e.target.value)
+                                  }
+                                  onBlur={() => commitRename(t.id)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") commitRename(t.id);
+                                    if (e.key === "Escape") setEditingId(null);
+                                  }}
+                                />
+                              ) : (
+                                <Link
+                                  href={`/dashboard/chat/${t.id}`}
+                                  className="flex flex-1 items-center gap-4 truncate"
+                                >
+                                  <Image
+                                    src={MessageIcon}
+                                    alt=""
+                                    width={18}
+                                    height={18}
+                                    className="h-5 w-5"
+                                    aria-hidden={true}
+                                  />
+                                  <span className="truncate">
+                                    <div className="truncate font-medium leading-tight">
+                                      {t.title}
+                                    </div>
+                                    <div className="truncate text-xs text-white/70">
+                                      {preview(t)}
+                                    </div>
+                                  </span>
+                                </Link>
+                              )}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger
+                                  aria-label="Open chat actions"
+                                  className="p-1 hover:bg-muted/40"
+                                >
+                                  <MoreHorizontal className="size-4" />
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    onSelect={(e) => {
+                                      e.preventDefault();
+                                      setEditingId(t.id);
+                                      setTitleDraft(t.title);
+                                    }}
+                                  >
+                                    Rename
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onSelect={(e) => {
+                                      e.preventDefault();
+                                      handleDelete(t.id);
+                                    }}
+                                  >
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          )}
+        </div>
+      )}
+    </aside>
+  );
 }

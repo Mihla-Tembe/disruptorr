@@ -1,6 +1,6 @@
-import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
-import { Hero } from "@/components/dashboard/hero"
-import { FeatureGrid } from "@/components/dashboard/feature-grid"
+import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
+import { Hero } from "@/components/dashboard/hero";
+import { FeatureGrid } from "@/components/dashboard/feature-grid";
 
 export default function DashboardPage() {
   return (
@@ -8,5 +8,5 @@ export default function DashboardPage() {
       <Hero />
       <FeatureGrid />
     </DashboardLayout>
-  )
+  );
 }
