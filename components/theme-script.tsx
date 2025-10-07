@@ -8,6 +8,7 @@ export function ThemeScript() {
       document.documentElement.classList.remove('dark');
     }
   } catch (e) {}
-  `;
-  return <script dangerouslySetInnerHTML={{ __html: code }} />;
+  `
+  // In the App Router, an inline script is acceptable; it runs early in body
+  return <script dangerouslySetInnerHTML={{ __html: code }} suppressHydrationWarning />
 }

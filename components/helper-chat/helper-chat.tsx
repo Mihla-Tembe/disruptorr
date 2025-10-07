@@ -1,123 +1,139 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { usePathname } from "next/navigation";
-import { Trash2 } from "lucide-react";
-import {
-  useHelperChat,
-  helperAssistantReply,
-  type HelperMessage,
-} from "@/lib/helper-chat-store";
-import AI from "@/public/ai-logo.svg";
-import ParternBg from "@/public/pattern-bg.png";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { usePathname } from "next/navigation"
+import { Trash2 } from "lucide-react"
+import AI from "@/public/ai-logo.svg"
+import ParternBg from "@/public/pattern-bg.png"
 import {
   TooltipProvider,
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-} from "@/components/ui/tooltip";
-import Image from "next/image";
-import CloseIcon from "@/public/icons/close.svg";
+} from "@/components/ui/tooltip"
+import Image from "next/image"
+import CloseIcon from "@/public/icons/close.svg"
+import { Card, CardContent } from "@/components/ui/card"
+import { QUICK_PROMPTS } from "@/constants"
 
-function Bubble({ message }: { message: HelperMessage }) {
-  const isUser = message.role === "user";
+type Role = "user" | "assistant"
+
+interface Message {
+  id: string
+  role: Role
+  text: string
+  time: number
+}
+
+function Bubble({ message }: { message: Message }) {
+  const isUser = message.role === "user"
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        className={`${isUser ? "bg-[#D7DEDD] animate-chat-in-right" : "bg-card animate-chat-in-left"} max-w-[75%] rounded-sm px-4 py-3 text-sm`}
+        className={`${
+          isUser
+            ? "bg-[#D7DEDD] animate-chat-in-right"
+            : "bg-[#00895D] animate-chat-in-left"
+        } max-w-[75%] rounded-sm px-4 py-3 text-sm`}
       >
-        {message.content}
+        {message.text}
       </div>
     </div>
   );
 }
 
 export function HelperChat() {
-  const { messages, append, clear } = useHelperChat();
-  const [open, setOpen] = React.useState(false); // logical open/closed
-  const [show, setShow] = React.useState(false); // mounted for exit animation
-  const [text, setText] = React.useState("");
-  const [unread, setUnread] = React.useState(0);
-  const pathname = usePathname();
-  const viewportRef = React.useRef<HTMLDivElement | null>(null);
-  const prevPath = React.useRef<string | null>(null);
-
-  React.useEffect(() => {
-    // Hide immediately on full chat pages
-    if (pathname?.startsWith("/dashboard/chat")) {
-      setOpen(false);
-      setShow(false);
-    }
-    // On any route change within the dashboard, close with animation if open
-    else if (
-      prevPath.current !== null &&
-      pathname !== prevPath.current &&
-      open
-    ) {
-      setOpen(false);
-      setTimeout(() => setShow(false), 260);
-    }
-    prevPath.current = pathname ?? null;
-  }, [pathname, open]);
-
-  React.useEffect(() => {
-    // Load persisted open preference
+  const [open, setOpen] = useState(false)
+  const [show, setShow] = useState(false)
+  const [input, setInput] = useState("")
+  const [unread] = useState(0)
+  const [messages, setMessages] = useState<Message[]>(() => {
     try {
-      const saved = localStorage.getItem("disruptor.helper.open.v1");
-      if (saved !== null) setOpen(saved === "1");
-    } catch {}
-  }, []);
+      const cached = sessionStorage.getItem("chatbot_messages")
+      return cached ? (JSON.parse(cached) as Message[]) : []
+    } catch {
+      return []
+    }
+  })
+  const [isTyping, setIsTyping] = useState(false)
 
-  React.useEffect(() => {
-    // Keyboard shortcuts: ? to open, Esc to close (avoid when typing in inputs)
-    function onKey(e: KeyboardEvent) {
-      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
-      const typing =
-        tag === "input" ||
-        tag === "textarea" ||
-        (e.target as HTMLElement)?.isContentEditable;
-      if (!typing && (e.key === "?" || (e.key === "/" && e.shiftKey))) {
-        setOpen(true);
+  const pathname = usePathname()
+  const viewportRef = useRef<HTMLDivElement | null>(null)
+  const listRef = useRef<HTMLDivElement | null>(null)
+
+  // --- endpoint fetch ---
+  async function fetchBotReply(userText: string): Promise<string> {
+    try {
+      const origin = window.location.origin
+      const endpoint = origin.includes("localhost")
+        ? "http://us-central1-localhost:3000/vdc200007-disruptor-prod/chat"
+        : "https://us-central1-vdc200007-disruptor-prod.cloudfunctions.net/chat2"
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: userText }),
+      })
+
+      const text = await res.text()
+      console.log("Raw response:", text)
+
+      let data
+      try {
+        data = JSON.parse(text)
+      } catch {
+        throw new Error("Server did not return valid JSON")
       }
-      if (open && e.key === "Escape") setOpen(false);
+      return data.reply || "Sorry, no reply received."
+    } catch (err) {
+      console.error("Fetch error:", err)
+      return "Error contacting the assistant."
     }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }
 
-  React.useEffect(() => {
-    // Reset unread when opening and scroll to bottom
-    if (open) {
-      setUnread(0);
-      setTimeout(() => {
-        viewportRef.current?.scrollTo({
-          top: viewportRef.current.scrollHeight,
-        });
-      }, 0);
-    }
-    try {
-      localStorage.setItem("disruptor.helper.open.v1", open ? "1" : "0");
-    } catch {}
-  }, [open]);
+  // --- persist messages ---
+  useEffect(() => {
+    sessionStorage.setItem("chatbot_messages", JSON.stringify(messages))
+  }, [messages])
 
-  function send(forceText?: string) {
-    const value = (forceText ?? text).trim();
-    if (!value) return;
-    append("user", value);
-    setText("");
-    setTimeout(() => {
-      append("assistant", helperAssistantReply(value));
-      if (!open) setUnread((n) => n + 1);
-    }, 250);
+  useEffect(() => {
+    if (!listRef.current) return
+    listRef.current.scrollTop = listRef.current.scrollHeight
+  }, [messages, isTyping])
+
+  function pushMessage(role: Role, text: string) {
+    setMessages((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), role, text: text.trim(), time: Date.now() },
+    ])
+  }
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    const text = input.trim()
+    if (!text) return
+
+    pushMessage("user", text)
+    setInput("")
+    setIsTyping(true)
+
+    const reply = await fetchBotReply(text)
+    pushMessage("assistant", reply)
+    setIsTyping(false)
   }
 
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      send();
+      e.preventDefault()
+      handleSubmit(e as unknown as FormEvent)
     }
   }
 
@@ -132,6 +148,7 @@ export function HelperChat() {
     else setTimeout(() => setShow(false), 260);
   }
 
+  // --- UI render ---
   return (
     <>
       {/* Toggle button */}
@@ -161,16 +178,24 @@ export function HelperChat() {
       {show && (
         <div className="fixed inset-0 z-50">
           <div
-            className={`absolute inset-0 bg-black/30 ${open ? "animate-overlay-fade-in" : "animate-overlay-fade-out"}`}
+            className={`absolute inset-0 bg-black/30 ${
+              open ? "animate-overlay-fade-in" : "animate-overlay-fade-out"
+            }`}
             onClick={() => closePanel()}
             aria-hidden
           />
           <aside
-            className={`absolute bottom-6 right-6 h-[70vh] w-[92vw] sm:w-[420px] bg-white text-black shadow-2xl flex flex-col ${open ? "animate-helper-slide-in" : "animate-helper-slide-out"} rounded-2xl overflow-hidden`}
+            className={`absolute bottom-6 right-6 h-[70vh] w-[92vw] sm:w-[420px] bg-white text-black shadow-2xl flex flex-col ${
+              open
+                ? "animate-helper-slide-in"
+                : "animate-helper-slide-out"
+            } rounded-2xl overflow-hidden`}
           >
             <div className="absolute inset-0 pointer-events-none opacity-80">
               <Image src={ParternBg.src} alt="" fill className="object-cover" />
             </div>
+
+            {/* header */}
             <header className="relative flex items-center justify-between px-4 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white">
               <div className="flex items-center gap-2">
                 <Image src={AI.src} alt="AI" width={18} height={18} />
@@ -181,7 +206,7 @@ export function HelperChat() {
                   variant="ghost"
                   size="icon"
                   aria-label="Clear"
-                  onClick={() => clear()}
+                  onClick={() => setMessages([])}
                 >
                   <Trash2 className="size-4" />
                 </Button>
@@ -202,32 +227,43 @@ export function HelperChat() {
                 </Button>
               </div>
             </header>
+
+            {/* messages */}
             <div className="relative flex-1 min-h-0">
               <ScrollArea className="h-full flex-1">
                 <div
                   ref={viewportRef}
                   className="relative z-10 flex flex-col gap-4 p-4"
                 >
-                  <Suggestions onPick={(t) => send(t)} />
+                  <Suggestions onPick={(t) => setInput(t)} />
                   {messages.map((m) => (
                     <Bubble key={m.id} message={m} />
                   ))}
+                  {isTyping && (
+                    <div className="text-xs text-gray-500">Assistant is typing…</div>
+                  )}
                 </div>
               </ScrollArea>
             </div>
-            <div className="relative z-10 border-t p-2 flex items-center gap-2 bg-white/70 backdrop-blur-sm">
+
+            {/* input */}
+            <form
+              onSubmit={handleSubmit}
+              className="relative z-10 border-t p-2 flex items-center gap-2 bg-white/70 backdrop-blur-sm"
+            >
               <Input
-                value={text}
-                onChange={(e) => setText(e.target.value)}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
                 onKeyDown={onKeyDown}
                 placeholder="Ask a quick question…"
                 className="flex-1"
                 autoFocus
               />
-              <Button onClick={() => send()} aria-label="Send">
+              <Button type="submit" aria-label="Send">
                 Send
               </Button>
-            </div>
+            </form>
+
             <p className="relative z-10 px-4 pb-4 text-center text-[11px] text-black/70">
               AI generated content may be incorrect.
             </p>
@@ -238,40 +274,12 @@ export function HelperChat() {
   );
 }
 
-import { Card, CardContent } from "@/components/ui/card";
-import { QUICK_PROMPTS } from "@/constants";
-
 function Suggestions({ onPick }: { onPick: (text: string) => void }) {
-  const pathname = usePathname();
-  const base = QUICK_PROMPTS.base;
-  const profile = QUICK_PROMPTS.profile;
-  const mediaUniverse = QUICK_PROMPTS.mediaUniverse;
-  const channelFlow = QUICK_PROMPTS.channelFlow;
-  const categorySignals = QUICK_PROMPTS.categorySignals;
-  const clientPulse = QUICK_PROMPTS.clientPulse;
-  const performanceBaselines = QUICK_PROMPTS.performanceBaselines;
-  const impactIntelligenceHub = QUICK_PROMPTS.impactIntelligenceHub;
-  const audienceDiscovery = QUICK_PROMPTS.audienceDiscovery;
-  const insightStream = QUICK_PROMPTS.insightStream;
+  const pathname = usePathname()
+  let items: string[] = [...QUICK_PROMPTS.base]
+  if (pathname?.startsWith("/dashboard/profile"))
+    items = [...QUICK_PROMPTS.profile, ...items]
 
-  let items: string[] = [...base];
-  if (pathname?.startsWith("/dashboard/profile")) items = [...profile, ...base];
-  else if (pathname?.startsWith("/dashboard/media-universe"))
-    items = [...mediaUniverse, ...base];
-  else if (pathname?.startsWith("/dashboard/channel-flow"))
-    items = [...channelFlow, ...base];
-  else if (pathname?.startsWith("/dashboard/category-signals"))
-    items = [...categorySignals, ...base];
-  else if (pathname?.startsWith("/dashboard/client-pulse"))
-    items = [...clientPulse, ...base];
-  else if (pathname?.startsWith("/dashboard/performance-baselines"))
-    items = [...performanceBaselines, ...base];
-  else if (pathname?.startsWith("/dashboard/impact-intelligence-hub"))
-    items = [...impactIntelligenceHub, ...base];
-  else if (pathname?.startsWith("/dashboard/audience-discovery"))
-    items = [...audienceDiscovery, ...base];
-  else if (pathname?.startsWith("/dashboard/insight-stream"))
-    items = [...insightStream, ...base];
   return (
     <div className="mb-2">
       <div className="text-xs uppercase tracking-wide text-emerald-900/80 mb-3 font-semibold">
@@ -283,7 +291,11 @@ function Suggestions({ onPick }: { onPick: (text: string) => void }) {
             key={i}
             className="border-emerald-600/20 hover:border-emerald-600/40 transition-colors bg-white/90 rounded-none"
           >
-            <button className="w-full text-left" onClick={() => onPick(text)}>
+            <button
+              className="w-full text-left"
+              onClick={() => onPick(text)}
+              type="button"
+            >
               <CardContent className="py-2 px-3 text-[13px] leading-snug rounded-none">
                 {text}
               </CardContent>

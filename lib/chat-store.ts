@@ -38,7 +38,7 @@ export function createThread(title = "New Chat"): ChatThread {
 export function appendMessage(
   threads: ChatThread[],
   threadId: string,
-  msg: Omit<ChatMessage, "id" | "createdAt">,
+  msg: Omit<ChatMessage, "id" | "createdAt">
 ): ChatThread[] {
   const next = threads.map((t) => {
     if (t.id !== threadId) return t;
@@ -70,7 +70,7 @@ export function updateMessageMeta(
   return threads.map((t) => {
     if (t.id !== threadId) return t;
     const messages = t.messages.map((m) =>
-      m.id === messageId ? { ...m, meta: { ...m.meta, ...meta } } : m,
+      m.id === messageId ? { ...m, meta: { ...m.meta, ...meta } } : m
     );
     return { ...t, messages, updatedAt: new Date().toISOString() };
   });
@@ -117,49 +117,52 @@ export function useThreads() {
         .slice()
         .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
     },
-    [threads, hydrated],
+    [threads, hydrated]
   );
 
   const update = React.useCallback(
     (mutator: (prev: ChatThread[]) => ChatThread[]) => {
       setThreads((prev) => mutator(prev));
     },
-    [setThreads],
+    [setThreads]
   );
 
-  const removeThread = React.useCallback(
-    (id: string) => {
-      setThreads((prev) => prev.filter((t) => t.id !== id));
-    },
-    [setThreads],
-  );
+  const removeThread = React.useCallback((id: string) => {
+    setThreads((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
   const newThread = React.useCallback(() => {
     const t = createThread();
     setThreads((prev) => [t, ...prev]);
     return t;
-  }, [setThreads]);
+  }, []);
 
-  return {
-    hydrated,
-    threads,
-    setThreads,
-    update,
-    ensureThread,
-    removeThread,
-    newThread,
-  };
+  return { hydrated, threads, setThreads, update, ensureThread, removeThread, newThread };
 }
 
-export function fakeAssistantReply(userInput: string): string {
-  const templates = [
-    "Here’s a concise take: ",
-    "Short answer: ",
-    "In summary, ",
-    "A helpful starting point: ",
-  ];
-  const suffix =
-    "This is a simulated response. Hook up your AI backend to replace this placeholder with real insights.";
-  const prefix = templates[userInput.length % templates.length];
-  return `${prefix}${userInput} — ${suffix}`;
+/**
+ * Real assistant reply via your backend
+ */
+export async function fetchBotReply(userText: string): Promise<string> {
+  try {
+    const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
+    const endpoint = isLocal
+      ? "http://localhost:3000/vdc200007-disruptor-prod/chat"
+      : "https://us-central1-vdc200007-disruptor-prod.cloudfunctions.net/chat2";
+
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: userText }),
+    });
+
+    const text = await res.text();
+    console.log("Raw response:", text);
+
+    const data = JSON.parse(text);
+    return data.reply || "Sorry, no reply received.";
+  } catch (err) {
+    console.error("Fetch error:", err);
+    return "Error contacting the assistant.";
+  }
 }

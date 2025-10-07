@@ -16,16 +16,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { SignUpSchema, type SignUpValues } from "@/types";
-import { signUpAction } from "@/actions/auth";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
-
-// Schema centralized in types/index.ts
+import { useAuth } from "@/components/providers/auth-provider";
+//
 
 export function SignUpForm({
-  onSubmit,
+   onSubmitAction,
 }: {
-  onSubmit?: (values: SignUpValues) => Promise<void> | void;
+  onSubmitAction?: (values: SignUpValues) => Promise<void> | void;
 }) {
   const form = useForm<SignUpValues>({
     resolver: zodResolver(SignUpSchema),
@@ -41,16 +40,27 @@ export function SignUpForm({
 
   const [submitting, setSubmitting] = React.useState(false);
   const router = useRouter();
+  const { refresh } = useAuth();
 
   async function handleSubmit(values: SignUpValues) {
     try {
       setSubmitting(true);
-      const res = (onSubmit
-        ? await onSubmit(values)
-        : await signUpAction(values)) as unknown as { ok?: boolean } | void;
-      if (res && "ok" in res && res.ok) {
+
+      const result = onSubmitAction
+      ? await onSubmitAction(values)
+      : await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values)
+      }).then(r => r.ok ? { ok: true } : r.json());
+
+      if ((result as { ok?: boolean } | undefined)?.ok || result === undefined) {
+        try { await refresh(); } catch {}
         router.push("/dashboard");
       }
+    } catch (error) {
+      console.error("Sign up failed:", error);
+      // Optionally show toast or error message
     } finally {
       setSubmitting(false);
     }
@@ -66,10 +76,8 @@ export function SignUpForm({
       </div>
 
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(handleSubmit)}
-          className="space-y-5 text-white"
-        >
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5 text-white">
+          {/* Full Name */}
           <FormField
             control={form.control}
             name="fullName"
@@ -90,6 +98,7 @@ export function SignUpForm({
             )}
           />
 
+          {/* Email */}
           <FormField
             control={form.control}
             name="email"
@@ -111,6 +120,7 @@ export function SignUpForm({
             )}
           />
 
+          {/* Password */}
           <FormField
             control={form.control}
             name="password"
@@ -132,6 +142,7 @@ export function SignUpForm({
             )}
           />
 
+          {/* Confirm Password */}
           <FormField
             control={form.control}
             name="confirmPassword"
@@ -153,6 +164,7 @@ export function SignUpForm({
             )}
           />
 
+          {/* Terms Checkbox */}
           <FormField
             control={form.control}
             name="acceptedTerms"
@@ -162,23 +174,16 @@ export function SignUpForm({
                   <FormControl>
                     <Checkbox
                       checked={field.value}
-                      onCheckedChange={(v: boolean) =>
-                        field.onChange(Boolean(v))
-                      }
+                      onCheckedChange={(v: boolean) => field.onChange(Boolean(v))}
                       aria-label="Accept terms"
                       className="rounded-none border border-white/20 bg-[#0B3F37] data-[state=checked]:bg-white data-[state=checked]:text-[#0F4D46]"
                     />
                   </FormControl>
                   <div className="text-sm text-white/90">
                     I agree to the{" "}
-                    <a href="/terms" className="underline">
-                      Terms
-                    </a>{" "}
+                    <a href="/terms" className="underline">Terms</a>{" "}
                     and{" "}
-                    <a href="/privacy" className="underline">
-                      Privacy Policy
-                    </a>
-                    .
+                    <a href="/privacy" className="underline">Privacy Policy</a>.
                   </div>
                 </div>
                 <FormMessage />
@@ -186,11 +191,11 @@ export function SignUpForm({
             )}
           />
 
+          {/* Submit Button */}
           <Button
             type="submit"
             className="h-12 w-full cursor-pointer rounded-none bg-white text-base font-semibold text-[#0F4D46] shadow-[0_15px_45px_-25px_rgba(224,181,255,0.9)] transition-colors duration-200 hover:bg-[#E0B5FF] disabled:cursor-not-allowed disabled:bg-white/60 disabled:text-[#0F4D46]/60"
-            disabled={submitting}
-          >
+            disabled={submitting}>
             {submitting ? "Creating Account…" : "Create Account"}
           </Button>
         </form>
@@ -199,10 +204,7 @@ export function SignUpForm({
       <div className="mt-10 border-t border-white/15 pt-8 text-center text-sm text-white/80">
         <p>
           Already have an account?{" "}
-          <Link
-            href="/signin"
-            className="font-semibold text-[#6BE9A0] hover:underline"
-          >
+          <Link href="/signin" className="font-semibold text-[#6BE9A0] hover:underline">
             Sign In
           </Link>
         </p>

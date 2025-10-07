@@ -28,83 +28,70 @@ export const features: Feature[] = [
 ];
 
 export const navGroups: NavGroup[] = [
-  {
-    id: "start",
-    label: "Start",
-    href: "/dashboard",
-  },
-  {
-    id: "media-universe",
-    label: "Media Universe",
-    href: "/dashboard/media-universe",
-  },
-  {
-    id: "channel-flow",
-    label: "Channel Flow",
-    href: "/dashboard/channel-flow",
-  },
-  {
-    id: "category-signals",
-    label: "Category Signals",
-    href: "/dashboard/category-signals",
-  },
-  {
-    id: "client-pulse",
-    label: "Client Pulse",
-    href: "/dashboard/client-pulse",
-  },
-  {
-    id: "performance-baselines",
-    label: "Performance Baselines",
-    items: [
-      {
-        label: "Performance Baselines",
-        href: "/dashboard/performance-baselines",
-      },
-    ],
-  },
-  {
-    id: "impact-intelligence-hub",
-    label: "Impact Intelligence Hub",
-    items: [
-      {
-        label: "Channel Flow",
-        href: "/dashboard/impact-intelligence-hub/channel-flow",
-      },
-      {
-        label: "Client Pulse",
-        href: "/dashboard/impact-intelligence-hub/client-pulse",
-      },
-      {
-        label: "Growth Signals",
-        href: "/dashboard/impact-intelligence-hub/growth-signals",
-      },
-      {
-        label: "Budget Beacon",
-        href: "/dashboard/impact-intelligence-hub/budget-beacon",
-      },
-    ],
-  },
-  {
-    id: "audience-discovery",
-    label: "Audience Discovery",
-    items: [
-      {
-        label: "Audience Discovery",
-        href: "/dashboard/audience-discovery",
-      },
-    ],
-  },
-  {
-    id: "insight-stream",
-    label: "Articles",
-    href: "/dashboard/insight-stream",
-  },
-  {
-    id: "ask-anything",
-    label: "Ask Anything",
-    href: "/dashboard/chat",
-  },
+   {
+      id: "start",
+      label: "Start",
+      href: "/dashboard",
+   },
+   {
+      id: "media-universe",
+      label: "Media Universe",
+      items: [
+             {
+                label: "Channel Flow",
+                href: "/dashboard/channel-flow",
+             },
+             {
+               label: "Category Signals",
+               href: "/dashboard/category-signals",
+            },
+             {
+                label: "Client Pulse",
+                href: "/dashboard/client-pulse",
+             },
+          ],
+   },
+   // {
+   //    id: "channel-flow",
+   //    label: "Channel Flow",
+   //    href: "/dashboard/channel-flow",
+   // },
+   // {
+   //    id: "category-signals",
+   //    label: "Category Signals",
+   //    href: "/dashboard/category-signals",
+   // },
+   // {
+   //    id: "client-pulse",
+   //    label: "Client Pulse",
+   //    href: "/dashboard/client-pulse",
+   // },
+   {
+      id: "performance-baselines",
+      label: "Performance Baselines",
+      href: "/dashboard/performance-baselines",
+      
+   },
+   {
+      id: "impact-intelligence-hub",
+      label: "Impact Intelligence Hub",
+      href: "/dashboard/impact-intelligence-hub",
+   },
+   // {
+   //    id: "audience-discovery",
+   //    label: "Audience Discovery",
+   //    href: "/dashboard/audience-discovery",
+   // },
+   {
+      id: "insight-stream",
+      label: "Articles",
+      href: "/dashboard/insight-stream",
+   },
+   {
+      id: "ask-anything",
+      label: "Ask Anything",
+      href: "/dashboard/chat",
+   },
 ];
 
 // Convenience re-exports for constants defined in other modules

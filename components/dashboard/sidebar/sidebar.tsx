@@ -51,10 +51,13 @@ export function Sidebar({
   collapsed,
   onToggleCollapse,
 }: SidebarProps) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const { status } = useAuth();
-  const [query, setQuery] = React.useState("");
+   const [mounted, setMounted] = React.useState(false);
+   React.useEffect(() => setMounted(true), []);
+
+   const pathname = usePathname();
+   const router = useRouter();
+   const { status } = useAuth();
+   const [query, setQuery] = React.useState("");
 
   const isLoading = status === "loading";
   const isMember = status === "member";
@@ -121,100 +124,101 @@ export function Sidebar({
     return items.some(navItemIsActive);
   }
 
-  return (
-    <aside
-      className={cn(
-        "sticky top-0 h-screen flex shrink-0 flex-col bg-primary text-white relative md:fixed md:inset-y-0 md:left-0 md:top-0",
-        collapsed ? "w-16" : "w-72",
-      )}
-    >
-      <div
-        className={`flex items-center justify-between gap-2 ${
-          collapsed ? "px-3" : "px-4"
-        } py-4`}
-      >
-        {collapsed ? null : (
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <Image
-              src={Logo.src}
-              alt="Person with colorful lighting effects representing innovation and creativity"
-              width={130}
-              height={50}
-              className="object-cover"
-              priority
-            />
-          </Link>
-        )}
-        <div className="flex items-center">
-          <Button
-            size="icon"
-            variant="ghost"
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            onClick={onToggleCollapse}
-            className="hover:bg-[#66FFA3] focus-visible:bg-[#66FFA3]"
-          >
-            <Image
-              src={collapseIcon}
-              alt=""
-              width={20}
-              height={20}
-              className={cn(
-                "h-5 w-5 transition-transform",
-                !collapsed && "rotate-180",
-              )}
-              aria-hidden={true}
-            />
-          </Button>
-          {onClose ? (
-            <Button
-              size="icon"
-              variant="ghost"
-              aria-label="Close sidebar"
-              className="md:hidden hover:bg-[#66FFA3] focus-visible:bg-[#66FFA3]"
-              onClick={onClose}
-            >
-              <Image
-                src={closeIcon}
-                alt=""
-                width={24}
-                height={24}
-                className="h-6 w-6"
-                aria-hidden={true}
-              />
-            </Button>
-          ) : null}
-        </div>
-      </div>
-      {!collapsed && isMember && (
-        <div className="px-4 pb-3">
-          <div className="relative">
-            <Image
-              src={searchIcon}
-              alt=""
-              width={20}
-              height={20}
-              className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2"
-              aria-hidden={true}
-            />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  const first = filtered[0];
-                  if (!first) return;
-                  const target = first.href ?? findFirstHref(first.items ?? []);
-                  if (target) router.push(target);
-                }
-              }}
-              placeholder={PLACEHOLDER_SEARCH}
-              className="pl-12 border-none text-white placeholder:text-white focus:ring-0  bg-primary-foreground/10 py-6"
-              aria-label={ARIA_SEARCH_NAV}
-              style={{ background: "rgba(255, 255, 255, 0.10)" }}
-            />
-          </div>
-        </div>
-      )}
+   if (!mounted) {
+      return null;
+   }
+
+   return (
+      <aside
+         className={cn(
+            "top-0 h-screen flex shrink-0 flex-col bg-primary text-white relative md:fixed md:inset-y-0 md:left-0 md:top-0",
+            collapsed ? "w-16" : "w-72"
+         )}>
+         <div
+            className={`flex items-center justify-between gap-2 ${
+               collapsed ? "px-3" : "px-4"
+            } py-4`}>
+            {collapsed ? null : (
+               <Link href="/dashboard" className="flex items-center gap-2">
+                  <Image
+                     src={Logo.src}
+                     alt="Person with colorful lighting effects representing innovation and creativity"
+                     width={130}
+                     height={50}
+                     className="object-cover"
+                     priority
+                  />
+               </Link>
+            )}
+            <div className="flex items-center">
+               <Button
+                  size="icon"
+                  variant="ghost"
+                  aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+                  onClick={onToggleCollapse}
+                  className="hover:bg-[#66FFA3] focus-visible:bg-[#66FFA3]">
+                  <Image
+                     src={collapseIcon}
+                     alt=""
+                     width={20}
+                     height={20}
+                     className={cn(
+                        "h-5 w-5 transition-transform",
+                        !collapsed && "rotate-180"
+                     )}
+                     aria-hidden={true}
+                  />
+               </Button>
+               {onClose ? (
+                  <Button
+                     size="icon"
+                     variant="ghost"
+                     aria-label="Close sidebar"
+                     className="md:hidden hover:bg-[#66FFA3] focus-visible:bg-[#66FFA3]"
+                     onClick={onClose}>
+                     <Image
+                        src={closeIcon}
+                        alt=""
+                        width={24}
+                        height={24}
+                        className="h-6 w-6"
+                        aria-hidden={true}
+                     />
+                  </Button>
+               ) : null}
+            </div>
+         </div>
+         {!collapsed && isMember && (
+            <div className="px-4 pb-3">
+               <div className="relative">
+                  <Image
+                     src={searchIcon}
+                     alt=""
+                     width={20}
+                     height={20}
+                     className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2"
+                     aria-hidden={true}
+                  />
+                  <Input
+                     value={query}
+                     onChange={(e) => setQuery(e.target.value)}
+                     onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                           const first = filtered[0];
+                           if (!first) return;
+                           const target =
+                              first.href ?? findFirstHref(first.items ?? []);
+                           if (target) router.push(target);
+                        }
+                     }}
+                     placeholder={PLACEHOLDER_SEARCH}
+                     className="pl-12 border-none text-white placeholder:text-white focus:ring-0  bg-primary-foreground/10 py-6"
+                     aria-label={ARIA_SEARCH_NAV}
+                     style={{ background: "rgba(255, 255, 255, 0.10)" }}
+                  />
+               </div>
+            </div>
+         )}
 
       {!collapsed &&
         (isLoading ? (

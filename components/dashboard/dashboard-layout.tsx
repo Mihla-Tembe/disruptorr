@@ -24,35 +24,56 @@ export function DashboardLayout({
   contentClassName?: string;
   mainClassName?: string;
 }) {
-  const pathname = usePathname();
-  const isDashboardHome = pathname === "/dashboard";
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const [collapsed, setCollapsed] = React.useState(false);
+   const [mounted, setMounted] = React.useState(false);
+   React.useEffect(() => setMounted(true), []);
 
-  const sidebarNode = React.useMemo(() => {
-    const onClose = () => setSidebarOpen(false);
-    const onToggleCollapse = () => setCollapsed((v) => !v);
-    const injectedProps = { onClose, collapsed, onToggleCollapse };
-    if (React.isValidElement(sidebar)) {
-      return React.cloneElement(
-        sidebar as React.ReactElement<SidebarProps>,
-        injectedProps,
-      );
-    }
-    return <Sidebar {...injectedProps} />;
-  }, [sidebar, collapsed]);
+   const pathname = usePathname();
+   const isDashboardHome = pathname === "/dashboard";
+   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+   const [collapsed, setCollapsed] = React.useState(false);
 
-  const baseContentClassName = React.useMemo(() => {
-    if (fullWidth) {
-      return "w-full pb-24 pt-8";
-    }
+   const sidebarNode = React.useMemo(() => {
+      const onClose = () => setSidebarOpen(false);
+      const onToggleCollapse = () => setCollapsed((v) => !v);
+      const injectedProps = { onClose, collapsed, onToggleCollapse };
+      if (React.isValidElement(sidebar)) {
+         return React.cloneElement(
+            sidebar as React.ReactElement<SidebarProps>,
+            injectedProps
+         );
+      }
+      return <Sidebar {...injectedProps} />;
+   }, [sidebar, collapsed]);
+
+   const baseContentClassName = React.useMemo(() => {
+      if (fullWidth) {
+         return "w-full pb-12 pt-8";
+      }
+
+      return isDashboardHome
+         ? "w-full px-0 pb-12 pt-0"
+         : "mx-auto w-full max-w-1xl px-4 pb-6 pt-4";
+   }, [fullWidth, isDashboardHome]);
 
     return isDashboardHome
       ? "w-full px-0 pb-24 pt-0"
       : "mx-auto w-full max-w-6xl px-10 pb-24 pt-8";
   }, [fullWidth, isDashboardHome]);
 
-  const resolvedContentClassName = cn(baseContentClassName, contentClassName);
+   if (!mounted) {
+      return null;
+   }
+
+   return (
+      <div
+         suppressHydrationWarning
+         className={
+            collapsed
+               ? "grid min-h-screen md:grid-cols-[4rem_1fr] bg-primary relative"
+               : "grid min-h-screen md:grid-cols-[18rem_1fr] bg-primary relative"
+         }>
+         {/* Static sidebar on md+ */}
+         <div className="hidden md:block">{sidebarNode}</div>
 
   return (
     <div

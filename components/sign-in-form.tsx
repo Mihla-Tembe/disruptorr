@@ -6,7 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignInSchema, type SignInValues } from "@/types";
 import { useRouter } from "next/navigation";
-import { signInAction } from "@/actions/auth";
+//
+import { useSearchParams } from "next/navigation";
 
 import {
   Form,
@@ -18,13 +19,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
-// Schema centralized in types/index.ts
+import { useAuth } from "@/components/providers/auth-provider";
 
 export function SignInForm({
-  onSubmit,
+   onSubmitAction,
 }: {
-  onSubmit?: (values: SignInValues) => Promise<void> | void;
+  onSubmitAction?: (values: SignInValues) => Promise<void> | void;
 }) {
   const form = useForm<SignInValues>({
     resolver: zodResolver(SignInSchema),
@@ -35,17 +35,32 @@ export function SignInForm({
     mode: "onTouched",
   });
 
-  const [submitting, setSubmitting] = React.useState(false);
-  const router = useRouter();
+   const [submitting, setSubmitting] = React.useState(false);
+   const router = useRouter();
+   const searchParams = useSearchParams();
+   const next = (searchParams as URLSearchParams).get("next") ?? "/dashboard";
+   const { refresh } = useAuth();
 
-  async function handleSubmit(values: SignInValues) {
-    try {
-      setSubmitting(true);
-      const res = (onSubmit
-        ? await onSubmit(values)
-        : await signInAction(values)) as unknown as { ok?: boolean } | void;
-      if (res && "ok" in res && res.ok) {
-        router.push("/dashboard");
+   async function handleSubmit(values: SignInValues) {
+      try {
+         setSubmitting(true);
+         const result = onSubmitAction
+         ? await onSubmitAction(values)
+         : await fetch('/api/auth/signin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(values)
+         }).then(r => r.ok ? { ok: true } : r.json());
+
+         if ((result as { ok?: boolean } | undefined)?.ok || result === undefined) {
+            try { await refresh(); } catch {}
+            router.push(next);
+         }
+      } catch (error) {
+         console.error("Sign in failed:", error);
+         // Optionally show error to user
+      } finally {
+         setSubmitting(false);
       }
     } finally {
       setSubmitting(false);
@@ -63,27 +78,27 @@ export function SignInForm({
         </p>
       </div>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="sr-only">Email</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Enter your email"
-                    type="email"
-                    className="h-12 rounded-none border border-white/15 bg-[#0B3F37] px-4 text-white placeholder:text-white/60 focus-visible:border-white focus-visible:ring-white/30"
-                    autoComplete="email"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+         <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+               <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                     <FormItem>
+                        <FormLabel className="sr-only">Email</FormLabel>
+                        <FormControl>
+                           <Input
+                              placeholder="Enter your email"
+                              type="email"
+                              className="h-12 rounded-none border border-white/15 bg-[#0B3F37] px-4 text-white placeholder:text-white/60 focus-visible:border-white focus-visible:ring-white/30"
+                              autoComplete="email"
+                              {...field}
+                           />
+                        </FormControl>
+                        <FormMessage />
+                     </FormItem>
+                  )}
+               />
 
           <FormField
             control={form.control}
@@ -115,16 +130,14 @@ export function SignInForm({
         </form>
       </Form>
 
-      <div className="mt-10 border-t border-white/15 pt-8 text-center text-sm text-white/80">
-        <p>
-          Don&apos;t have an account?{" "}
-          <Link
-            href="/signup"
-            className="font-semibold text-[#6BE9A0] hover:underline"
-          >
-            Sign Up
-          </Link>
-        </p>
+         <div className="mt-10 border-t border-white/15 pt-8 text-center text-sm text-white/80">
+            <p>
+               Don&apos;t have an account?{" "}
+               <Link href="/signup" className="font-semibold text-[#6BE9A0] hover:underline">
+                  Sign Up
+               </Link>
+            </p>
+         </div>
       </div>
     </div>
   );
