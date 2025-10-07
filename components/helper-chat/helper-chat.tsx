@@ -1,40 +1,35 @@
-"use client"
+"use client";
 
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  type FormEvent,
-} from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { usePathname } from "next/navigation"
-import { Trash2 } from "lucide-react"
-import AI from "@/public/ai-logo.svg"
-import ParternBg from "@/public/pattern-bg.png"
+import React, { useEffect, useRef, useState, type FormEvent } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { usePathname } from "next/navigation";
+import { Trash2 } from "lucide-react";
+import AI from "@/public/ai-logo.svg";
+import ParternBg from "@/public/pattern-bg.png";
 import {
   TooltipProvider,
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-} from "@/components/ui/tooltip"
-import Image from "next/image"
-import CloseIcon from "@/public/icons/close.svg"
-import { Card, CardContent } from "@/components/ui/card"
-import { QUICK_PROMPTS } from "@/constants"
+} from "@/components/ui/tooltip";
+import Image from "next/image";
+import CloseIcon from "@/public/icons/close.svg";
+import { Card, CardContent } from "@/components/ui/card";
+import { QUICK_PROMPTS } from "@/constants";
 
-type Role = "user" | "assistant"
+type Role = "user" | "assistant";
 
 interface Message {
-  id: string
-  role: Role
-  text: string
-  time: number
+  id: string;
+  role: Role;
+  text: string;
+  time: number;
 }
 
 function Bubble({ message }: { message: Message }) {
-  const isUser = message.role === "user"
+  const isUser = message.role === "user";
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
@@ -51,89 +46,89 @@ function Bubble({ message }: { message: Message }) {
 }
 
 export function HelperChat() {
-  const [open, setOpen] = useState(false)
-  const [show, setShow] = useState(false)
-  const [input, setInput] = useState("")
-  const [unread] = useState(0)
+  const [open, setOpen] = useState(false);
+  const [show, setShow] = useState(false);
+  const [input, setInput] = useState("");
+  const [unread] = useState(0);
   const [messages, setMessages] = useState<Message[]>(() => {
     try {
-      const cached = sessionStorage.getItem("chatbot_messages")
-      return cached ? (JSON.parse(cached) as Message[]) : []
+      const cached = sessionStorage.getItem("chatbot_messages");
+      return cached ? (JSON.parse(cached) as Message[]) : [];
     } catch {
-      return []
+      return [];
     }
-  })
-  const [isTyping, setIsTyping] = useState(false)
+  });
+  const [isTyping, setIsTyping] = useState(false);
 
-  const pathname = usePathname()
-  const viewportRef = useRef<HTMLDivElement | null>(null)
-  const listRef = useRef<HTMLDivElement | null>(null)
+  const pathname = usePathname();
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const listRef = useRef<HTMLDivElement | null>(null);
 
   // --- endpoint fetch ---
   async function fetchBotReply(userText: string): Promise<string> {
     try {
-      const origin = window.location.origin
+      const origin = window.location.origin;
       const endpoint = origin.includes("localhost")
         ? "http://us-central1-localhost:3000/vdc200007-disruptor-prod/chat"
-        : "https://us-central1-vdc200007-disruptor-prod.cloudfunctions.net/chat2"
+        : "https://us-central1-vdc200007-disruptor-prod.cloudfunctions.net/chat2";
 
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: userText }),
-      })
+      });
 
-      const text = await res.text()
-      console.log("Raw response:", text)
+      const text = await res.text();
+      console.log("Raw response:", text);
 
-      let data
+      let data;
       try {
-        data = JSON.parse(text)
+        data = JSON.parse(text);
       } catch {
-        throw new Error("Server did not return valid JSON")
+        throw new Error("Server did not return valid JSON");
       }
-      return data.reply || "Sorry, no reply received."
+      return data.reply || "Sorry, no reply received.";
     } catch (err) {
-      console.error("Fetch error:", err)
-      return "Error contacting the assistant."
+      console.error("Fetch error:", err);
+      return "Error contacting the assistant.";
     }
   }
 
   // --- persist messages ---
   useEffect(() => {
-    sessionStorage.setItem("chatbot_messages", JSON.stringify(messages))
-  }, [messages])
+    sessionStorage.setItem("chatbot_messages", JSON.stringify(messages));
+  }, [messages]);
 
   useEffect(() => {
-    if (!listRef.current) return
-    listRef.current.scrollTop = listRef.current.scrollHeight
-  }, [messages, isTyping])
+    if (!listRef.current) return;
+    listRef.current.scrollTop = listRef.current.scrollHeight;
+  }, [messages, isTyping]);
 
   function pushMessage(role: Role, text: string) {
     setMessages((prev) => [
       ...prev,
       { id: crypto.randomUUID(), role, text: text.trim(), time: Date.now() },
-    ])
+    ]);
   }
 
   async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    const text = input.trim()
-    if (!text) return
+    e.preventDefault();
+    const text = input.trim();
+    if (!text) return;
 
-    pushMessage("user", text)
-    setInput("")
-    setIsTyping(true)
+    pushMessage("user", text);
+    setInput("");
+    setIsTyping(true);
 
-    const reply = await fetchBotReply(text)
-    pushMessage("assistant", reply)
-    setIsTyping(false)
+    const reply = await fetchBotReply(text);
+    pushMessage("assistant", reply);
+    setIsTyping(false);
   }
 
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSubmit(e as unknown as FormEvent)
+      e.preventDefault();
+      handleSubmit(e as unknown as FormEvent);
     }
   }
 
@@ -186,9 +181,7 @@ export function HelperChat() {
           />
           <aside
             className={`absolute bottom-6 right-6 h-[70vh] w-[92vw] sm:w-[420px] bg-white text-black shadow-2xl flex flex-col ${
-              open
-                ? "animate-helper-slide-in"
-                : "animate-helper-slide-out"
+              open ? "animate-helper-slide-in" : "animate-helper-slide-out"
             } rounded-2xl overflow-hidden`}
           >
             <div className="absolute inset-0 pointer-events-none opacity-80">
@@ -240,7 +233,9 @@ export function HelperChat() {
                     <Bubble key={m.id} message={m} />
                   ))}
                   {isTyping && (
-                    <div className="text-xs text-gray-500">Assistant is typing…</div>
+                    <div className="text-xs text-gray-500">
+                      Assistant is typing…
+                    </div>
                   )}
                 </div>
               </ScrollArea>
@@ -275,10 +270,10 @@ export function HelperChat() {
 }
 
 function Suggestions({ onPick }: { onPick: (text: string) => void }) {
-  const pathname = usePathname()
-  let items: string[] = [...QUICK_PROMPTS.base]
+  const pathname = usePathname();
+  let items: string[] = [...QUICK_PROMPTS.base];
   if (pathname?.startsWith("/dashboard/profile"))
-    items = [...QUICK_PROMPTS.profile, ...items]
+    items = [...QUICK_PROMPTS.profile, ...items];
 
   return (
     <div className="mb-2">

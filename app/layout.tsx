@@ -7,7 +7,7 @@ import { AuthProvider } from "@/components/providers/auth-provider";
 import PatternBg from "@/public/pattern-bg.png";
 import Image from "next/image";
 import { Funnel_Display } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/next";
 
 const funnelDisplay = Funnel_Display({
   subsets: ["latin"],
@@ -26,26 +26,26 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-   return (
-      <html lang="en" className={funnelDisplay.variable} suppressHydrationWarning>
-         <body className="antialiased font-sans relative" suppressHydrationWarning>
-            <Image
-               src={PatternBg}
-               alt=""
-               fill
-               priority
-               aria-hidden
-               className="inset-0 object-cover opacity-70 pointer-events-none z-50 !fixed"
-            />
-            <ThemeScript />
-            <ToastProviderInternal>
-               <AuthProvider>
-                  {children}
-                  <Toaster />
-                  <Analytics/>
-               </AuthProvider>
-            </ToastProviderInternal>
-         </body>
-      </html>
-   );
+  return (
+    <html lang="en" className={funnelDisplay.variable} suppressHydrationWarning>
+      <body className="antialiased font-sans relative" suppressHydrationWarning>
+        <Image
+          src={PatternBg}
+          alt=""
+          fill
+          priority
+          aria-hidden
+          className="inset-0 object-cover opacity-70 pointer-events-none z-50 !fixed"
+        />
+        <ThemeScript />
+        <ToastProviderInternal>
+          <AuthProvider>
+            {children}
+            <Toaster />
+            <Analytics />
+          </AuthProvider>
+        </ToastProviderInternal>
+      </body>
+    </html>
+  );
 }

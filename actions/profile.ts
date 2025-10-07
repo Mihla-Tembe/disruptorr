@@ -10,16 +10,24 @@ function getJwtSecret() {
   return new TextEncoder().encode(process.env.AUTH_SECRET ?? "dev-secret");
 }
 
-async function getUserIdFromSession(): Promise<{ id: string; email?: string } | null> {
-  const cookieStore = await cookies()
-  const token = cookieStore.get("session")?.value
-  if (!token) return null
+async function getUserIdFromSession(): Promise<{
+  id: string;
+  email?: string;
+} | null> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
+  if (!token) return null;
   try {
-    const { payload } = await jwtVerify(token, getJwtSecret())
-    const id = String(payload.sub ?? "")
-    if (!id) return null
-    const email = typeof payload.user === 'object' && payload.user && typeof (payload.user as any).email === 'string' ? (payload.user as any).email : undefined
-    return { id, email }
+    const { payload } = await jwtVerify(token, getJwtSecret());
+    const id = String(payload.sub ?? "");
+    if (!id) return null;
+    const email =
+      typeof payload.user === "object" &&
+      payload.user &&
+      typeof (payload.user as any).email === "string"
+        ? (payload.user as any).email
+        : undefined;
+    return { id, email };
   } catch {
     return null;
   }
@@ -68,41 +76,41 @@ export async function getProfileAction(): Promise<
     }
   | { ok: false; error: string }
 > {
-  const session = await getUserIdFromSession()
-  if (!session) return { ok: false, error: "Not authenticated" }
+  const session = await getUserIdFromSession();
+  if (!session) return { ok: false, error: "Not authenticated" };
   // Try to read local users file for name (fallback), but if missing, still return email
-  const users = await readUsers().catch(() => [])
-  const user = users.find((u) => u.id === session.id)
-  const fullName = user?.fullName ?? ""
-  const [firstName = "", ...rest] = fullName.split(" ")
-  const lastName = rest.join(" ")
-  const email = session.email ?? user?.email ?? ""
-  return { ok: true, profile: { firstName, lastName, email } }
+  const users = await readUsers().catch(() => []);
+  const user = users.find((u) => u.id === session.id);
+  const fullName = user?.fullName ?? "";
+  const [firstName = "", ...rest] = fullName.split(" ");
+  const lastName = rest.join(" ");
+  const email = session.email ?? user?.email ?? "";
+  return { ok: true, profile: { firstName, lastName, email } };
 }
 
 export async function updateProfileAction(input: {
-  firstName: string
-  lastName: string
-  email: string
-  newPassword?: string | null
-  confirmNewPassword?: string | null
-}): Promise<
-  | { ok: true }
-  | { ok: false; error: string }
-> {
-  const uid = await getUserIdFromSession()
-  if (!uid) return { ok: false, error: "Not authenticated" }
+  firstName: string;
+  lastName: string;
+  email: string;
+  newPassword?: string | null;
+  confirmNewPassword?: string | null;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const uid = await getUserIdFromSession();
+  if (!uid) return { ok: false, error: "Not authenticated" };
 
-  const firstName = (input.firstName ?? "").trim()
-  const lastName = (input.lastName ?? "").trim()
-  const email = (input.email ?? "").trim()
-  if (!firstName || !lastName) return { ok: false, error: "Name is required" }
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: "Valid email is required" }
-  const wantsPasswordChange = Boolean(input.newPassword || input.confirmNewPassword)
+  const firstName = (input.firstName ?? "").trim();
+  const lastName = (input.lastName ?? "").trim();
+  const email = (input.email ?? "").trim();
+  if (!firstName || !lastName) return { ok: false, error: "Name is required" };
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    return { ok: false, error: "Valid email is required" };
+  const wantsPasswordChange = Boolean(
+    input.newPassword || input.confirmNewPassword,
+  );
 
-  const users = await readUsers()
-  const idx = users.findIndex((u) => u.id === uid.id)
-  if (idx === -1) return { ok: false, error: "User not found" }
+  const users = await readUsers();
+  const idx = users.findIndex((u) => u.id === uid.id);
+  if (idx === -1) return { ok: false, error: "User not found" };
 
   if (wantsPasswordChange) {
     const np = String(input.newPassword ?? "");
@@ -113,11 +121,14 @@ export async function updateProfileAction(input: {
   }
 
   // Ensure email is unique if changed
-  const emailOwner = users.find((u) => u.email.toLowerCase() === email.toLowerCase())
-  if (emailOwner && emailOwner.id !== uid.id) return { ok: false, error: "Email already in use" }
+  const emailOwner = users.find(
+    (u) => u.email.toLowerCase() === email.toLowerCase(),
+  );
+  if (emailOwner && emailOwner.id !== uid.id)
+    return { ok: false, error: "Email already in use" };
 
-  const user = users[idx]
-  const fullName = `${firstName} ${lastName}`.trim()
+  const user = users[idx];
+  const fullName = `${firstName} ${lastName}`.trim();
   const next: StoredUser = {
     ...user,
     fullName,
@@ -131,13 +142,17 @@ export async function updateProfileAction(input: {
   return { ok: true };
 }
 
-export async function deleteAccountAction(): Promise<{ ok: boolean; error?: string }> {
-  const uid = await getUserIdFromSession()
-  if (!uid) return { ok: false, error: "Not authenticated" }
-  const users = await readUsers()
-  const next = users.filter((u) => u.id !== uid.id)
-  if (next.length === users.length) return { ok: false, error: "User not found" }
-  await writeUsers(next)
+export async function deleteAccountAction(): Promise<{
+  ok: boolean;
+  error?: string;
+}> {
+  const uid = await getUserIdFromSession();
+  if (!uid) return { ok: false, error: "Not authenticated" };
+  const users = await readUsers();
+  const next = users.filter((u) => u.id !== uid.id);
+  if (next.length === users.length)
+    return { ok: false, error: "User not found" };
+  await writeUsers(next);
   // clear session cookie
   const cookieStore = await cookies();
   cookieStore.set("session", "", {
