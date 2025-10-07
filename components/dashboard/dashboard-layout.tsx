@@ -47,12 +47,12 @@ export function DashboardLayout({
 
    const baseContentClassName = React.useMemo(() => {
       if (fullWidth) {
-         return "w-full pb-24 pt-8";
+         return "w-full pb-12 pt-8";
       }
 
       return isDashboardHome
-         ? "w-full px-0 pb-24 pt-0"
-         : "mx-auto w-full max-w-1xl px-4 pb-24 pt-4";
+         ? "w-full px-0 pb-12 pt-0"
+         : "mx-auto w-full max-w-1xl px-4 pb-6 pt-4";
    }, [fullWidth, isDashboardHome]);
 
    const resolvedContentClassName = cn(baseContentClassName, contentClassName);

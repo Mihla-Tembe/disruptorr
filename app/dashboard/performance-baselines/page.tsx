@@ -15,6 +15,7 @@ export default function PerformanceBaselinesPage() {
                allowFullScreen
                sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
             ></iframe>
+            <div className="absolute bottom-0 left-0 w-full h-[32px] bg-white pointer-events-none"></div>
          </div>
       </DashboardLayout>
    );
